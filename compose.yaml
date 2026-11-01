@@ -1,0 +1,141 @@
+name: kit-design
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: kit
+      POSTGRES_PASSWORD: kit_dev_password
+      POSTGRES_DB: kit
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - kit-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kit -d kit"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+
+  migrate:
+    build:
+      context: .
+      dockerfile: services/user/Dockerfile
+    entrypoint: ["/app/migrate"]
+    command: ["up"]
+    environment:
+      DATABASE_URL: postgres://kit:kit_dev_password@db:5432/kit?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+  user:
+    build:
+      context: .
+      dockerfile: services/user/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: development
+      PORT: "3001"
+      DATABASE_URL: postgres://kit:kit_dev_password@db:5432/kit?sslmode=disable
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:5173}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:5173}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY:-}
+      JWT_KEY_ID: ${JWT_KEY_ID:-dev-1}
+      JWT_ISSUER: kit-user
+      JWT_AUDIENCE: kit-api
+      ACCESS_TOKEN_TTL: 15m
+      REFRESH_TOKEN_TTL: 720h
+      COOKIE_SECURE: "false"
+      MAILER: smtp
+      SMTP_ADDR: mailpit:1025
+      MAIL_FROM: no-reply@kit.local
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-dev-internal-token-change-me}
+      RATE_LIMIT_ENABLED: "true"
+    ports:
+      - "127.0.0.1:3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
+
+  prometheus:
+    image: prom/prometheus:v3.15.1
+    profiles: ["observability"]
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=168h
+    volumes:
+      - ./services/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - kit-prometheus:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+
+  grafana:
+    image: grafana/grafana:13.2.3
+    profiles: ["observability"]
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - loki
+    volumes:
+      - ./services/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./services/observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - kit-grafana:/var/lib/grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_INSTALL_PLUGINS: ""
+      GF_LOG_LEVEL: warn
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      GF_PATHS_DATA: /var/lib/grafana
+      GF_PATHS_PLUGINS: /var/lib/grafana/plugins
+      GF_PATHS_DASHBOARDS: /etc/grafana/dashboards
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  loki:
+    image: grafana/loki:3.7.9
+    profiles: ["observability"]
+    restart: unless-stopped
+    command:
+      - -config.file=/mnt/config/loki.yml
+    volumes:
+      - ./services/observability/loki/loki.yml:/mnt/config/loki.yml:ro
+      - kit-loki:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+
+  promtail:
+    image: grafana/promtail:3.6.11
+    profiles: ["observability"]
+    restart: unless-stopped
+    depends_on:
+      - loki
+    volumes:
+      - ./services/observability/promtail/promtail.yml:/mnt/config/promtail.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - kit-promtail:/data
+    environment:
+      LOKI_URL: http://loki:3100/loki/api/v1/push
+    command:
+      - -config.file=/mnt/config/promtail.yml
+      - -log.level=info
+
+volumes:
+  kit-postgres:
+  kit-promtail:
+  kit-prometheus:
+  kit-grafana:
+  kit-loki:

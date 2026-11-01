@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+.vite/
+*.tsbuildinfo
+services/user/bin/
+*.test
+*.out
+
+# Go workspace
+go.work.sum
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+.secrets/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Caches
+.cache/
+.eslintcache
+.oxlintcache
+coverage/
+.nyc_output/
+
+# Test output
+playwright-report/
+test-results/
+
+# Editor and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
