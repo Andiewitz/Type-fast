@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/identity"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/identity"
 )
 
 func (s *Store) ListUsers(ctx context.Context, query string, limit, offset int) ([]identity.User, int, error) {

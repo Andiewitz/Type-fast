@@ -30,7 +30,7 @@ If `/usr/local/go/bin` is not on `PATH`, add it or invoke that binary directly. 
 
 `go.work` is committed deliberately so the service and test modules resolve together; `go.work.sum` stays local. Do not add machine-specific `replace` directives.
 
-The test module is `kitdesign/services/user/tests` even though it lives at the repository root. This keeps its import path under the service module so integration tests can import service packages while remaining a separate module.
+The test module is `typefast/services/user/tests` even though it lives at the repository root. This keeps its import path under the service module so integration tests can import service packages while remaining a separate module.
 
 ## Setup
 

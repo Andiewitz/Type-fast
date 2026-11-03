@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
+	"typefast/services/user/internal/apperr"
 )
 
 func (s *Server) handleInternalAuthz(w http.ResponseWriter, r *http.Request) {

@@ -9,12 +9,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/identity"
-	"kitdesign/services/user/internal/mailer"
-	"kitdesign/services/user/internal/outbox"
-	"kitdesign/services/user/internal/recovery"
-	"kitdesign/services/user/internal/register"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/identity"
+	"typefast/services/user/internal/mailer"
+	"typefast/services/user/internal/outbox"
+	"typefast/services/user/internal/recovery"
+	"typefast/services/user/internal/register"
 )
 
 func (s *Store) CreateRegistration(ctx context.Context, user identity.User, verification register.Token, message mailer.Message) error {

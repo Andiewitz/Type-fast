@@ -1,4 +1,4 @@
-# Kit Design Documentation
+# Type Fast Documentation
 
 | Area | Purpose |
 | --- | --- |

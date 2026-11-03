@@ -10,12 +10,12 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/audit"
-	"kitdesign/services/user/internal/identity"
-	"kitdesign/services/user/internal/mailer"
-	"kitdesign/services/user/internal/recovery"
-	tokenpkg "kitdesign/services/user/internal/token"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/audit"
+	"typefast/services/user/internal/identity"
+	"typefast/services/user/internal/mailer"
+	"typefast/services/user/internal/recovery"
+	tokenpkg "typefast/services/user/internal/token"
 )
 
 type fakeStore struct {

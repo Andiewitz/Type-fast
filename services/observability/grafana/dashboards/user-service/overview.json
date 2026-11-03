@@ -226,7 +226,7 @@
   ],
   "refresh": "30s",
   "schemaVersion": 40,
-  "tags": ["kit-design", "user-service", "observability"],
+  "tags": ["type-fast", "user-service", "observability"],
   "templating": {
     "list": []
   },
@@ -236,8 +236,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Kit Design User Service Overview",
-  "uid": "kit-design-user-service-overview",
+  "title": "Type Fast User Service Overview",
+  "uid": "type-fast-user-service-overview",
   "version": 1,
   "weekStart": ""
 }

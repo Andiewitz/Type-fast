@@ -14,7 +14,7 @@ curl -sf http://localhost:3100/ready
 ```
 
 Grafana can be inspected at http://localhost:3000. The dashboard is under the
-`Kit Design` folder.
+`Type Fast` folder.
 
 ## Safety
 

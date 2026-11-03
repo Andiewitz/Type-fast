@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/audit"
-	"kitdesign/services/user/internal/identity"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/audit"
+	"typefast/services/user/internal/identity"
 )
 
 type Store interface {

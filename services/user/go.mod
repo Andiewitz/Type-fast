@@ -1,4 +1,4 @@
-module kitdesign/services/user
+module typefast/services/user
 
 go 1.27.3
 

@@ -30,7 +30,7 @@ The repository has client applications but no backend service. Accounts need a d
 
 ### Runtime
 
-- Go 1.27.3 module: `kitdesign/services/user`
+- Go 1.27.3 module: `typefast/services/user`
 - HTTP service on port `3001`
 - PostgreSQL 18
 - Mailpit for local SMTP capture

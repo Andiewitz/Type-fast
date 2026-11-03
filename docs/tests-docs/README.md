@@ -16,7 +16,7 @@ Test strategy and conventions for the suites in [`/tests`](../../tests/).
 ## Current tooling
 
 - Go unit tests: `go test` in `services/user`, files named `*_test.go`.
-- Go integration tests: `tests/int/user`, run from the `kitdesign/services/user/tests` module against PostgreSQL.
+- Go integration tests: `tests/int/user`, run from the `typefast/services/user/tests` module against PostgreSQL.
 - Load: k6 scripts in `tests/k6`, opt-in.
 - Client unit tests: Vitest when the client suites are added.
 - End-to-end: Playwright when browser flows are added.

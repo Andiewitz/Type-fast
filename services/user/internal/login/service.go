@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/audit"
-	"kitdesign/services/user/internal/identity"
-	"kitdesign/services/user/internal/session"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/audit"
+	"typefast/services/user/internal/identity"
+	"typefast/services/user/internal/session"
 )
 
 type Store interface {
@@ -85,7 +85,7 @@ func (s *Service) recordAudit(ctx context.Context, userID *uuid.UUID, action, ip
 }
 
 var dummyHash = sync.OnceValue(func() string {
-	hash, err := identity.HashPassword("kit-design-dummy-password-value")
+	hash, err := identity.HashPassword("type-fast-dummy-password-value")
 	if err != nil {
 		panic(err)
 	}

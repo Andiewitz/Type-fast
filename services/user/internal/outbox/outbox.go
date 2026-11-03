@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/mailer"
+	"typefast/services/user/internal/mailer"
 )
 
 const TopicEmailSend = "email.send"

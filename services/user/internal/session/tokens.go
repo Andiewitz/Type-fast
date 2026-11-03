@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
+	"typefast/services/user/internal/apperr"
 )
 
 type Claims struct {

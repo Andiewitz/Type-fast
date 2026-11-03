@@ -33,5 +33,5 @@ Use `TEST_DATABASE_URL` to isolate the run. The user-service harness truncates i
 ## Tooling
 
 - Go testing with `httptest` and a real PostgreSQL store.
-- Module path: `kitdesign/services/user/tests`.
+- Module path: `typefast/services/user/tests`.
 - Future client integration tests use Vitest once configured.

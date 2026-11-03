@@ -1,4 +1,4 @@
-module kitdesign/services/user/tests
+module typefast/services/user/tests
 
 go 1.27.3
 

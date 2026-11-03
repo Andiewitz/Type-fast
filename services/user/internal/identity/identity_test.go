@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/identity"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/identity"
 )
 
 func TestNormalizeEmail(t *testing.T) {

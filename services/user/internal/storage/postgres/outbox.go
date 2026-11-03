@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/outbox"
+	"typefast/services/user/internal/outbox"
 )
 
 func (s *Store) ClaimOutbox(ctx context.Context, limit int) ([]outbox.Message, error) {

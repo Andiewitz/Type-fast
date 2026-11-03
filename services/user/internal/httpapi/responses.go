@@ -3,9 +3,9 @@ package httpapi
 import (
 	"time"
 
-	"kitdesign/services/user/internal/audit"
-	"kitdesign/services/user/internal/identity"
-	"kitdesign/services/user/internal/session"
+	"typefast/services/user/internal/audit"
+	"typefast/services/user/internal/identity"
+	"typefast/services/user/internal/session"
 )
 
 type userResponse struct {

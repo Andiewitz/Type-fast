@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"kitdesign/services/user/internal/audit"
+	"typefast/services/user/internal/audit"
 )
 
 func (s *Store) Record(ctx context.Context, event audit.Event) error {

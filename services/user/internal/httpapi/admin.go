@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/identity"
-	"kitdesign/services/user/internal/session"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/identity"
+	"typefast/services/user/internal/session"
 )
 
 func (s *Server) handleAdminListUsers(w http.ResponseWriter, r *http.Request) {

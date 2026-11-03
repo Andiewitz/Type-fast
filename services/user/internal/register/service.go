@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/audit"
-	"kitdesign/services/user/internal/identity"
-	"kitdesign/services/user/internal/mailer"
-	"kitdesign/services/user/internal/token"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/audit"
+	"typefast/services/user/internal/identity"
+	"typefast/services/user/internal/mailer"
+	"typefast/services/user/internal/token"
 )
 
 const (
@@ -131,8 +131,8 @@ func (s *Service) verificationMessage(email, rawToken string) mailer.Message {
 	link := fmt.Sprintf("%s/verify-email?token=%s", s.publicAppURL, rawToken)
 	return mailer.Message{
 		To:      email,
-		Subject: "Verify your Kit Design email",
-		Text:    "Confirm your email address to activate your Kit Design account:\n\n" + link + "\n\nThis link expires in 24 hours. If you did not create an account, ignore this email.\n",
+		Subject: "Verify your Type Fast email",
+		Text:    "Confirm your email address to activate your Type Fast account:\n\n" + link + "\n\nThis link expires in 24 hours. If you did not create an account, ignore this email.\n",
 	}
 }
 

@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/session"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/session"
 )
 
 func (s *Server) handleGetAccount(w http.ResponseWriter, r *http.Request) {

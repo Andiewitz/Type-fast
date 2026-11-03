@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"kitdesign/services/user/internal/config"
+	"typefast/services/user/internal/config"
 )
 
 var envKeys = []string{

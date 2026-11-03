@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/identity"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/identity"
 )
 
 type Store struct {

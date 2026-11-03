@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"kitdesign/services/user/internal/storage/migrations"
+	"typefast/services/user/internal/storage/migrations"
 )
 
 func main() {

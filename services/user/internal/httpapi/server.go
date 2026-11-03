@@ -8,14 +8,14 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"kitdesign/services/user/internal/account"
-	"kitdesign/services/user/internal/authorization"
-	"kitdesign/services/user/internal/config"
-	"kitdesign/services/user/internal/login"
-	"kitdesign/services/user/internal/observability"
-	"kitdesign/services/user/internal/recovery"
-	"kitdesign/services/user/internal/register"
-	"kitdesign/services/user/internal/session"
+	"typefast/services/user/internal/account"
+	"typefast/services/user/internal/authorization"
+	"typefast/services/user/internal/config"
+	"typefast/services/user/internal/login"
+	"typefast/services/user/internal/observability"
+	"typefast/services/user/internal/recovery"
+	"typefast/services/user/internal/register"
+	"typefast/services/user/internal/session"
 )
 
 type Pinger interface {

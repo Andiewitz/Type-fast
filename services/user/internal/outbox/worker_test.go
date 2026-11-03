@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/mailer"
-	"kitdesign/services/user/internal/outbox"
+	"typefast/services/user/internal/mailer"
+	"typefast/services/user/internal/outbox"
 )
 
 type fakeStore struct {

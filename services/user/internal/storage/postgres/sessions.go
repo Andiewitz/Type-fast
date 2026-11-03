@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/session"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/session"
 )
 
 const sessionColumns = `id, user_id, family_id, refresh_token_hash, user_agent, ip, created_at, last_used_at, expires_at, revoked_at`

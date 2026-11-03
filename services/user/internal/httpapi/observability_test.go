@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"kitdesign/services/user/internal/observability"
+	"typefast/services/user/internal/observability"
 )
 
 func TestPanicRecoveryStackOnlyInObservabilityLogs(t *testing.T) {

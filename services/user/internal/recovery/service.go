@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/audit"
-	"kitdesign/services/user/internal/identity"
-	"kitdesign/services/user/internal/mailer"
-	"kitdesign/services/user/internal/token"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/audit"
+	"typefast/services/user/internal/identity"
+	"typefast/services/user/internal/mailer"
+	"typefast/services/user/internal/token"
 )
 
 const (
@@ -62,8 +62,8 @@ func (s *Service) ForgotPassword(ctx context.Context, email, ip string) error {
 	link := fmt.Sprintf("%s/reset-password?token=%s", s.publicAppURL, rawToken)
 	message := mailer.Message{
 		To:      normalized,
-		Subject: "Reset your Kit Design password",
-		Text:    "Reset your Kit Design password using this link:\n\n" + link + "\n\nThis link expires in 30 minutes and can be used once. If you did not request this, ignore this email.\n",
+		Subject: "Reset your Type Fast password",
+		Text:    "Reset your Type Fast password using this link:\n\n" + link + "\n\nThis link expires in 30 minutes and can be used once. If you did not request this, ignore this email.\n",
 	}
 
 	sent, err := s.store.CreatePasswordReset(ctx, normalized, record, message)

@@ -1,4 +1,4 @@
-# Kit Design Agent Workflow
+# Type Fast Agent Workflow
 
 All agents should operate the kit the same way.
 

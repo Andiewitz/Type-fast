@@ -8,7 +8,7 @@ import (
 	"mime"
 	"net/http"
 
-	"kitdesign/services/user/internal/apperr"
+	"typefast/services/user/internal/apperr"
 )
 
 type problemBody struct {

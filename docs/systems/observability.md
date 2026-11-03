@@ -14,7 +14,7 @@ Stack: Prometheus 3.15, Grafana 13, Loki 3.7, Promtail 3.6
 
 The observability stack is the only place where detailed diagnostics are meant
 to be consumed. It keeps Prometheus metrics, structured logs, and Grafana
-dashboards for the Kit Design services.
+dashboards for the Type Fast services.
 
 ## Layout
 

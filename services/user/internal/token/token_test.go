@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"kitdesign/services/user/internal/token"
+	"typefast/services/user/internal/token"
 )
 
 func TestGenerate(t *testing.T) {

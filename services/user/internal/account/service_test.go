@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	"kitdesign/services/user/internal/account"
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/audit"
-	"kitdesign/services/user/internal/identity"
-	"kitdesign/services/user/internal/session"
+	"typefast/services/user/internal/account"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/audit"
+	"typefast/services/user/internal/identity"
+	"typefast/services/user/internal/session"
 )
 
 type fakeStore struct {

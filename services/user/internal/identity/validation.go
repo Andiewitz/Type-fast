@@ -6,7 +6,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"kitdesign/services/user/internal/apperr"
+	"typefast/services/user/internal/apperr"
 )
 
 func NormalizeEmail(raw string) (string, error) {

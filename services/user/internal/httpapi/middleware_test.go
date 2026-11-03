@@ -11,8 +11,8 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"kitdesign/services/user/internal/apperr"
-	"kitdesign/services/user/internal/config"
+	"typefast/services/user/internal/apperr"
+	"typefast/services/user/internal/config"
 )
 
 func discardLogger() *slog.Logger {
