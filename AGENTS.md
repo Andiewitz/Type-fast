@@ -36,7 +36,7 @@ All agents should follow the same workflow.
 
 ## Commits
 
-- For feature work, aim for 200-400 changed lines per commit (insertions plus deletions from `git diff --stat`), with roughly 600 as the ceiling. Small fixes and documentation updates can be smaller.
+- For feature work, keep each commit to at least 200 changed lines (insertions plus deletions from `git diff --stat`), aim for around 400, and treat roughly 600 as the ceiling. Small fixes and documentation updates are exempt from the minimum. Use judgment; the goal is reviewable commits, not an exact count.
 - If a change is larger, split it into ordered commits on the same dev branch by layer (migration, service, HTTP, client, tests, docs) or into stacked pull requests.
 - Keep generated files, lockfiles, and mechanical renames in a separate commit and call them out in the pull request description.
 - Each commit should leave the branch buildable and the relevant tests passing.
