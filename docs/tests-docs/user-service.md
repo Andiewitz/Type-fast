@@ -71,6 +71,7 @@ Covered flows:
 - Audit event visibility for account actions.
 - CSRF origin rejection, content-type enforcement, weak password rejection, invalid token handling.
 - Health and readiness endpoints.
+- Cognito identity storage: creating a verified user from a subject, duplicate subject and email rejection, subject lookup, linking to an existing local account with idempotent relink, re-point and cross-account conflicts, soft-deleted accounts, and blank-input validation.
 
 Email is not sent during integration tests. The outbox payload is read directly so verification and reset tokens can be extracted.
 

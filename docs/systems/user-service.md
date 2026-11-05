@@ -138,6 +138,16 @@ Tables:
 
 Indexes cover user status, active sessions, token lookup, audit history, and pending outbox work.
 
+### Cognito identity mapping
+
+Cognito is the public identity provider. It proves who a user is but stores no application data; the canonical account is always a `users` row.
+
+- `users.cognito_sub` holds the Cognito subject. The partial unique index `users_cognito_sub_key` allows at most one live account per subject while leaving local accounts unlinked.
+- Accounts created through Cognito store `identity.PasswordHashExternal` in `password_hash`. It is not a valid hash, so local password login always fails for them.
+- `postgres.Store` exposes `CreateUserFromCognito`, `GetUserByCognitoSub`, and `LinkCognitoSub`. Conflict codes separate `cognito_sub_taken`, `cognito_sub_already_linked`, and `email_exists`; subject lookups return `cognito_identity_not_found`.
+- Linking is idempotent for the same subject and refuses to re-point an account that already has a different one.
+- Soft-deleted accounts are invisible to subject lookup and cannot be linked.
+
 ## Email delivery
 
 Registration and recovery handlers write email messages to `outbox_events` in the same transaction as state changes. The worker claims pending rows with `FOR UPDATE SKIP LOCKED`, sends through the configured mailer, and marks success or schedules retry with backoff.
