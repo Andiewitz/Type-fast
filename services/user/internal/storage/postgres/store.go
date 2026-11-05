@@ -47,6 +47,17 @@ func isUniqueViolation(err error) bool {
 	return errors.As(err, &pgErr) && pgErr.Code == "23505"
 }
 
+// Unique constraint names that callers need to tell apart.
+const (
+	usersEmailKey      = "users_email_key"
+	usersCognitoSubKey = "users_cognito_sub_key"
+)
+
+func isConstraintViolation(err error, constraint string) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505" && pgErr.ConstraintName == constraint
+}
+
 func mapNotFound(err error, code string) error {
 	if errors.Is(err, pgx.ErrNoRows) {
 		return apperr.NotFound(code)
@@ -68,6 +79,7 @@ func scanUser(row pgx.Row) (identity.User, error) {
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.DeletedAt,
+		&user.CognitoSub,
 	)
 	if err != nil {
 		return identity.User{}, err
@@ -90,6 +102,7 @@ func scanUserRows(rows pgx.Rows) (identity.User, error) {
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.DeletedAt,
+		&user.CognitoSub,
 	)
 	if err != nil {
 		return identity.User{}, err
@@ -98,4 +111,4 @@ func scanUserRows(rows pgx.Rows) (identity.User, error) {
 	return user, nil
 }
 
-const userColumns = `id, email, password_hash, status, display_name, email_verified_at, last_login_at, created_at, updated_at, deleted_at`
+const userColumns = `id, email, password_hash, status, display_name, email_verified_at, last_login_at, created_at, updated_at, deleted_at, COALESCE(cognito_sub, '') AS cognito_sub`

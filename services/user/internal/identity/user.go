@@ -24,9 +24,15 @@ func (s Status) Valid() bool {
 	}
 }
 
+// PasswordHashExternal marks an account whose credentials are managed by an
+// external identity provider. It is not a valid password hash, so local
+// password login always fails for these accounts.
+const PasswordHashExternal = "!external-identity"
+
 type User struct {
 	ID              uuid.UUID
 	Email           string
+	CognitoSub      string
 	PasswordHash    string
 	Status          Status
 	DisplayName     string
