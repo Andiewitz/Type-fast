@@ -201,15 +201,29 @@ func TestBanReachesAnotherReplica(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	ctx := context.Background()
 	follower := revocation.NewRegistry(h.store, nil)
-	if err := follower.Refresh(context.Background()); err != nil {
+	if err := follower.Refresh(ctx); err != nil {
 		t.Fatalf("follower refresh: %v", err)
 	}
 	if !follower.TokenRevoked(userID, time.Now().UTC().Add(-time.Minute)) {
 		t.Fatal("a polling replica must reject tokens issued before the ban")
 	}
+	if !follower.TokenRevoked(userID, time.Now().UTC().Add(time.Hour)) {
+		t.Fatal("a polling replica must refuse fresh tokens while the account is suspended")
+	}
+
+	if result := h.request(t, http.MethodPatch, "/v1/admin/users/"+member.ID+"/status", map[string]string{"status": "active"}, admin.AccessToken); result.status != http.StatusOK {
+		t.Fatalf("activate status = %d: %s", result.status, result.body)
+	}
+	if err := follower.Refresh(ctx); err != nil {
+		t.Fatalf("follower refresh: %v", err)
+	}
 	if follower.TokenRevoked(userID, time.Now().UTC().Add(time.Hour)) {
-		t.Fatal("a polling replica must accept tokens issued after the ban")
+		t.Fatal("a polling replica must accept fresh tokens after reactivation")
+	}
+	if !follower.TokenRevoked(userID, time.Now().UTC().Add(-time.Minute)) {
+		t.Fatal("pre-ban tokens must stay dead after reactivation")
 	}
 }
 
@@ -263,5 +277,48 @@ func TestBanRecordsRevocationState(t *testing.T) {
 	}
 	if retained == nil || !retained.Equal(*revokedBefore) {
 		t.Fatalf("revocation marker after activation = %v, want %v", retained, revokedBefore)
+	}
+}
+
+// While an account is suspended, even a token minted after the ban is refused:
+// otherwise a refresh through the identity provider would mint its way back in.
+func TestBanRejectsTokensIssuedAfterTheBan(t *testing.T) {
+	h := newHarness(t)
+	ctx := context.Background()
+	password := "correct horse battery staple"
+
+	admin := h.adminToken(t, "admin@example.com", password)
+	member := h.registerAndVerify(t, "member@example.com", password)
+	userID, err := uuid.Parse(member.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if result := h.request(t, http.MethodPatch, "/v1/admin/users/"+member.ID+"/status", map[string]string{"status": "suspended"}, admin.AccessToken); result.status != http.StatusOK {
+		t.Fatalf("suspend status = %d: %s", result.status, result.body)
+	}
+
+	fresh := h.mintAccessToken(t, userID)
+	result := h.request(t, http.MethodGet, "/v1/account", nil, fresh)
+	if result.status != http.StatusUnauthorized {
+		t.Fatalf("post-ban token status = %d, want 401: %s", result.status, result.body)
+	}
+	var problem problemPayload
+	decode(t, result.body, &problem)
+	if problem.Code != "token_revoked" {
+		t.Fatalf("post-ban token code = %q, want token_revoked", problem.Code)
+	}
+
+	if activated := h.request(t, http.MethodPatch, "/v1/admin/users/"+member.ID+"/status", map[string]string{"status": "active"}, admin.AccessToken); activated.status != http.StatusOK {
+		t.Fatalf("activate status = %d: %s", activated.status, activated.body)
+	}
+
+	// Other replicas pick the lift up on their next reload.
+	if err := h.revocations.Refresh(ctx); err != nil {
+		t.Fatalf("refresh: %v", err)
+	}
+	recovered := h.request(t, http.MethodGet, "/v1/account", nil, h.mintAccessToken(t, userID))
+	if recovered.status != http.StatusOK {
+		t.Fatalf("reactivated token status = %d, want 200: %s", recovered.status, recovered.body)
 	}
 }

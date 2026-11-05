@@ -98,9 +98,11 @@ Duplicate registration returns the same `202` response as a new registration.
 
 Access tokens are verified offline, so nothing can recall one after it is signed. Suspending an account therefore does three things in a single transaction: sets `status = 'suspended'` (blocks login), revokes every session (blocks refresh), and stamps `users.revoked_before = now()`.
 
-Each replica keeps an in-memory snapshot of accounts that carry a revocation marker. A request is rejected with `401 token_revoked` when its token was issued at or before that marker.
+Each replica keeps an in-memory snapshot of revoked accounts. A request is rejected with `401 token_revoked` when the account is suspended, or when its token was issued at or before the account's marker.
 
-- The replica that performs a ban applies it immediately; other replicas reload the snapshot every `REVOCATION_REFRESH_INTERVAL` (default `5s`).
+- Suspension is absolute: every token is refused, including one minted after the ban. This is what stops a refresh through the identity provider from minting access back.
+- After reactivation the marker is kept and only the suspension is lifted, so fresh tokens work again while pre-ban tokens stay dead.
+- The replica that performs a ban or reactivation applies it immediately; other replicas reload the snapshot every `REVOCATION_REFRESH_INTERVAL` (default `5s`), which also bounds how long either change takes to propagate.
 - The check is a map lookup per authenticated request: it adds no database load and its memory follows the number of revoked accounts, not the number of users.
 - JWT issued-at has one-second resolution, so a token minted in the same second as the ban is allowed. The exposure window is under a second; the comparison deliberately favours not locking out a freshly signed-in user.
 - Reactivating an account restores sign-in but never resurrects tokens issued before the ban, because the marker is kept.

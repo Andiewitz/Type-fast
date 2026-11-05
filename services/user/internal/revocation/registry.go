@@ -3,8 +3,12 @@
 //
 // Access tokens are signed and verified offline, so nothing can recall one
 // after it is issued. Instead the service keeps a small in-memory snapshot of
-// accounts that were revoked, refreshed from storage on a timer. A request is
-// rejected when its token was issued at or before that account's marker.
+// revoked accounts, refreshed from storage on a timer.
+//
+// An account is rejected in one of two ways:
+//   - it is suspended, so every token is refused regardless of age;
+//   - it carries a marker from an earlier ban, so tokens issued at or before
+//     that marker stay refused even after the account is reactivated.
 //
 // The snapshot holds revoked accounts only, so its size follows the number of
 // bans rather than the number of users, and the per-request cost is a map
@@ -21,11 +25,18 @@ import (
 	"github.com/google/uuid"
 )
 
-// Entry is one account's revocation marker: tokens issued at or before Before
-// are no longer accepted.
+// Entry is one account's revocation state.
 type Entry struct {
 	UserID uuid.UUID
+
+	// Before is the moment the account was last banned. Tokens issued at or
+	// before it are refused forever, even after reactivation.
 	Before time.Time
+
+	// Suspended refuses every token, including ones minted after the ban. This
+	// is what makes a ban absolute: a refresh through an external identity
+	// provider cannot mint its way back in.
+	Suspended bool
 }
 
 // Source loads the current set of revoked accounts.
@@ -36,7 +47,7 @@ type Source interface {
 // Registry is a concurrency-safe snapshot of revoked accounts.
 type Registry struct {
 	mu      sync.RWMutex
-	revoked map[uuid.UUID]time.Time
+	revoked map[uuid.UUID]Entry
 	source  Source
 	logger  *slog.Logger
 }
@@ -50,7 +61,7 @@ func NewRegistry(source Source, logger *slog.Logger) *Registry {
 	return &Registry{
 		source:  source,
 		logger:  logger,
-		revoked: make(map[uuid.UUID]time.Time),
+		revoked: make(map[uuid.UUID]Entry),
 	}
 }
 
@@ -63,9 +74,9 @@ func (r *Registry) Refresh(ctx context.Context) error {
 		return fmt.Errorf("revocation: refresh: %w", err)
 	}
 
-	next := make(map[uuid.UUID]time.Time, len(entries))
+	next := make(map[uuid.UUID]Entry, len(entries))
 	for _, entry := range entries {
-		next[entry.UserID] = entry.Before
+		next[entry.UserID] = entry
 	}
 
 	r.mu.Lock()
@@ -75,15 +86,24 @@ func (r *Registry) Refresh(ctx context.Context) error {
 }
 
 // Revoke records a ban locally so the replica that wrote it enforces the ban on
-// the next request instead of waiting for the next refresh. The latest marker
-// wins, so an older timestamp can never shorten an existing ban.
+// the next request instead of waiting for the next refresh.
 func (r *Registry) Revoke(userID uuid.UUID, before time.Time) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if existing, ok := r.revoked[userID]; ok && existing.After(before) {
-		before = existing
+	r.revoked[userID] = Entry{UserID: userID, Before: before, Suspended: true}
+}
+
+// Restore lifts a suspension locally, keeping the marker so tokens issued at or
+// before it stay refused. An account that was never banned is dropped from the
+// snapshot entirely.
+func (r *Registry) Restore(userID uuid.UUID, before time.Time) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if before.IsZero() {
+		delete(r.revoked, userID)
+		return
 	}
-	r.revoked[userID] = before
+	r.revoked[userID] = Entry{UserID: userID, Before: before}
 }
 
 // TokenRevoked reports whether a token issued at issuedAt must be rejected.
@@ -91,10 +111,14 @@ func (r *Registry) Revoke(userID uuid.UUID, before time.Time) {
 // prove the token postdates the ban.
 func (r *Registry) TokenRevoked(userID uuid.UUID, issuedAt time.Time) bool {
 	r.mu.RLock()
-	before, ok := r.revoked[userID]
+	entry, ok := r.revoked[userID]
 	r.mu.RUnlock()
 	if !ok {
 		return false
+	}
+
+	if entry.Suspended {
+		return true
 	}
 	if issuedAt.IsZero() {
 		return true
@@ -103,7 +127,7 @@ func (r *Registry) TokenRevoked(userID uuid.UUID, issuedAt time.Time) bool {
 	// a token minted just after a ban can still carry an issued-at inside the
 	// ban's own second. Comparing against the truncated marker allows that
 	// sub-second window instead of rejecting legitimate fresh tokens.
-	return issuedAt.Before(before.Truncate(time.Second))
+	return issuedAt.Before(entry.Before.Truncate(time.Second))
 }
 
 // Run refreshes the snapshot on every tick until ctx is cancelled. Refresh

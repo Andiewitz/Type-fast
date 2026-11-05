@@ -22,10 +22,11 @@ type Store interface {
 	CheckPermission(ctx context.Context, userID uuid.UUID, permission string) (bool, error)
 }
 
-// TokenRevoker records a ban in the local enforcement snapshot so the replica
-// that issued it rejects the account's existing tokens immediately.
+// TokenRevoker keeps the local enforcement snapshot in step with a status
+// change, so the replica that handled it does not wait for the next reload.
 type TokenRevoker interface {
 	Revoke(userID uuid.UUID, before time.Time)
+	Restore(userID uuid.UUID, before time.Time)
 }
 
 type Service struct {
@@ -61,13 +62,22 @@ func (s *Service) SetStatus(ctx context.Context, actorID, targetID uuid.UUID, st
 		return identity.User{}, err
 	}
 
-	if status == identity.StatusSuspended && s.revoker != nil {
-		before := time.Now().UTC()
+	if s.revoker != nil {
+		var before time.Time
 		if user.RevokedBefore != nil {
 			before = *user.RevokedBefore
 		}
-		s.revoker.Revoke(targetID, before)
-		s.logger.Info("tokens revoked for suspended account", "user_id", targetID, "revoked_before", before)
+		switch status {
+		case identity.StatusSuspended:
+			if before.IsZero() {
+				before = time.Now().UTC()
+			}
+			s.revoker.Revoke(targetID, before)
+			s.logger.Info("tokens revoked for suspended account", "user_id", targetID, "revoked_before", before)
+		case identity.StatusActive:
+			s.revoker.Restore(targetID, before)
+			s.logger.Info("account reactivated", "user_id", targetID, "revoked_before", before)
+		}
 	}
 
 	_ = s.audit.Record(ctx, audit.Event{

@@ -420,6 +420,21 @@ func (h *harness) adminToken(t *testing.T, email, password string) tokenPayload 
 	return h.login(t, email, password)
 }
 
+// mintAccessToken issues a token directly for an account, bypassing login, so a
+// test can model a token minted after a ban (for example by a Cognito refresh).
+func (h *harness) mintAccessToken(t *testing.T, userID uuid.UUID) string {
+	t.Helper()
+	tokens, err := session.NewTokenManager(h.config.JWTPrivateKey, h.config.JWTKeyID, h.config.JWTIssuer, h.config.JWTAudience, h.config.AccessTTL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	token, _, err := tokens.Issue(userID, uuid.Must(uuid.NewV7()), []string{"user"}, []string{"account.read"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return token
+}
+
 func decode(t *testing.T, payload []byte, target any) {
 	t.Helper()
 	if err := json.Unmarshal(payload, target); err != nil {

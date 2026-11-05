@@ -114,15 +114,23 @@ func TestSetStatusRecordsAudit(t *testing.T) {
 }
 
 type fakeRevoker struct {
-	calls  int
-	userID uuid.UUID
-	before time.Time
+	calls      int
+	restores   int
+	userID     uuid.UUID
+	before     time.Time
+	restoredAt time.Time
 }
 
 func (r *fakeRevoker) Revoke(userID uuid.UUID, before time.Time) {
 	r.calls++
 	r.userID = userID
 	r.before = before
+}
+
+func (r *fakeRevoker) Restore(userID uuid.UUID, before time.Time) {
+	r.restores++
+	r.userID = userID
+	r.restoredAt = before
 }
 
 func TestSetStatusSuspensionRevokesTokens(t *testing.T) {
@@ -148,12 +156,16 @@ func TestSetStatusSuspensionRevokesTokens(t *testing.T) {
 		t.Fatal("expected a revocation timestamp")
 	}
 
-	// Reactivation must not add a new marker: pre-ban tokens stay dead.
+	// Reactivation lifts the suspension locally without adding a marker, so
+	// pre-ban tokens stay dead.
 	if _, err := service.SetStatus(context.Background(), actor, target, identity.StatusActive, ""); err != nil {
 		t.Fatal(err)
 	}
 	if revoker.calls != 1 {
 		t.Fatalf("revoker calls after activation = %d, want 1", revoker.calls)
+	}
+	if revoker.restores != 1 {
+		t.Fatalf("restore calls after activation = %d, want 1", revoker.restores)
 	}
 }
 
