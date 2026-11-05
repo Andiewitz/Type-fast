@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -68,7 +69,7 @@ func (r *recorder) Record(_ context.Context, event audit.Event) error {
 func newService(store *fakeStore) (*authorization.Service, *recorder) {
 	events := &recorder{}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return authorization.NewService(store, events, logger), events
+	return authorization.NewService(store, events, nil, logger), events
 }
 
 func TestSetStatusValidation(t *testing.T) {
@@ -109,6 +110,50 @@ func TestSetStatusRecordsAudit(t *testing.T) {
 	}
 	if events.events[0].SubjectID == nil || *events.events[0].SubjectID != target {
 		t.Fatal("audit subject does not match target")
+	}
+}
+
+type fakeRevoker struct {
+	calls  int
+	userID uuid.UUID
+	before time.Time
+}
+
+func (r *fakeRevoker) Revoke(userID uuid.UUID, before time.Time) {
+	r.calls++
+	r.userID = userID
+	r.before = before
+}
+
+func TestSetStatusSuspensionRevokesTokens(t *testing.T) {
+	t.Parallel()
+
+	store := &fakeStore{}
+	revoker := &fakeRevoker{}
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	service := authorization.NewService(store, &recorder{}, revoker, logger)
+	actor := uuid.Must(uuid.NewV7())
+	target := uuid.Must(uuid.NewV7())
+
+	if _, err := service.SetStatus(context.Background(), actor, target, identity.StatusSuspended, ""); err != nil {
+		t.Fatal(err)
+	}
+	if revoker.calls != 1 {
+		t.Fatalf("revoker calls = %d, want 1", revoker.calls)
+	}
+	if revoker.userID != target {
+		t.Fatalf("revoked user = %s, want %s", revoker.userID, target)
+	}
+	if revoker.before.IsZero() {
+		t.Fatal("expected a revocation timestamp")
+	}
+
+	// Reactivation must not add a new marker: pre-ban tokens stay dead.
+	if _, err := service.SetStatus(context.Background(), actor, target, identity.StatusActive, ""); err != nil {
+		t.Fatal(err)
+	}
+	if revoker.calls != 1 {
+		t.Fatalf("revoker calls after activation = %d, want 1", revoker.calls)
 	}
 }
 

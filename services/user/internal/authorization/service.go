@@ -3,6 +3,7 @@ package authorization
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -21,14 +22,21 @@ type Store interface {
 	CheckPermission(ctx context.Context, userID uuid.UUID, permission string) (bool, error)
 }
 
-type Service struct {
-	store  Store
-	audit  audit.Recorder
-	logger *slog.Logger
+// TokenRevoker records a ban in the local enforcement snapshot so the replica
+// that issued it rejects the account's existing tokens immediately.
+type TokenRevoker interface {
+	Revoke(userID uuid.UUID, before time.Time)
 }
 
-func NewService(store Store, recorder audit.Recorder, logger *slog.Logger) *Service {
-	return &Service{store: store, audit: recorder, logger: logger}
+type Service struct {
+	store   Store
+	audit   audit.Recorder
+	revoker TokenRevoker
+	logger  *slog.Logger
+}
+
+func NewService(store Store, recorder audit.Recorder, revoker TokenRevoker, logger *slog.Logger) *Service {
+	return &Service{store: store, audit: recorder, revoker: revoker, logger: logger}
 }
 
 func (s *Service) ListUsers(ctx context.Context, query string, limit, offset int) ([]identity.User, int, error) {
@@ -52,6 +60,16 @@ func (s *Service) SetStatus(ctx context.Context, actorID, targetID uuid.UUID, st
 	if err != nil {
 		return identity.User{}, err
 	}
+
+	if status == identity.StatusSuspended && s.revoker != nil {
+		before := time.Now().UTC()
+		if user.RevokedBefore != nil {
+			before = *user.RevokedBefore
+		}
+		s.revoker.Revoke(targetID, before)
+		s.logger.Info("tokens revoked for suspended account", "user_id", targetID, "revoked_before", before)
+	}
+
 	_ = s.audit.Record(ctx, audit.Event{
 		ActorID:   &actorID,
 		SubjectID: &targetID,

@@ -31,6 +31,7 @@ import (
 	"typefast/services/user/internal/observability"
 	"typefast/services/user/internal/recovery"
 	"typefast/services/user/internal/register"
+	"typefast/services/user/internal/revocation"
 	"typefast/services/user/internal/session"
 	"typefast/services/user/internal/storage/migrations"
 	"typefast/services/user/internal/storage/postgres"
@@ -46,6 +47,8 @@ type harness struct {
 	plain  *http.Client
 	config config.Config
 	logger *slog.Logger
+
+	revocations *revocation.Registry
 }
 
 type response struct {
@@ -127,6 +130,13 @@ func newHarness(t *testing.T) *harness {
 		t.Fatal(err)
 	}
 
+	revocations := revocation.NewRegistry(store, nil)
+	if err := revocations.Refresh(ctx); err != nil {
+		pool.Close()
+		store.Close()
+		t.Fatal(err)
+	}
+
 	_, privateKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		pool.Close()
@@ -166,10 +176,10 @@ func newHarness(t *testing.T) *harness {
 	loginService := login.NewService(store, sessionService, store, logger)
 	accountService := account.NewService(store, store, logger)
 	recoveryService := recovery.NewService(store, cfg.PublicAppURL, store, logger)
-	authorizationService := authorization.NewService(store, store, logger)
+	authorizationService := authorization.NewService(store, store, revocations, logger)
 
 	metrics := observability.NewPrometheus()
-	api := httpapi.New(cfg, logger, store, metrics, registerService, loginService, sessionService, accountService, recoveryService, authorizationService, tokens)
+	api := httpapi.New(cfg, logger, store, metrics, registerService, loginService, sessionService, accountService, recoveryService, authorizationService, tokens, revocations)
 	server := httptest.NewServer(api.Routes())
 
 	jar, err := cookiejar.New(nil)
@@ -181,13 +191,14 @@ func newHarness(t *testing.T) *harness {
 	}
 
 	h := &harness{
-		server: server,
-		store:  store,
-		pool:   pool,
-		client: &http.Client{Jar: jar},
-		plain:  &http.Client{},
-		config: cfg,
-		logger: logger,
+		server:      server,
+		store:       store,
+		pool:        pool,
+		client:      &http.Client{Jar: jar},
+		plain:       &http.Client{},
+		config:      cfg,
+		logger:      logger,
+		revocations: revocations,
 	}
 	t.Cleanup(func() {
 		server.Close()

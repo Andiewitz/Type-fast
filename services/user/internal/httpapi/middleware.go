@@ -145,11 +145,28 @@ func (s *Server) requireAuth(next http.Handler) http.Handler {
 			writeError(w, r, apperr.Unauthorized("invalid_token"), s.logger)
 			return
 		}
-		claims, err := s.tokens.Parse(strings.TrimSpace(strings.TrimPrefix(header, "Bearer ")))
+		token := strings.TrimSpace(strings.TrimPrefix(header, "Bearer "))
+		claims, err := s.tokens.Parse(token)
 		if err != nil {
 			writeError(w, r, err, s.logger)
 			return
 		}
+
+		// A signed token cannot be recalled, so bans are enforced by comparing
+		// its issue time against the account's revocation marker.
+		if s.revocations != nil {
+			if userID, parseErr := uuid.Parse(claims.Subject); parseErr == nil {
+				issuedAt := time.Time{}
+				if claims.IssuedAt != nil {
+					issuedAt = claims.IssuedAt.Time
+				}
+				if s.revocations.TokenRevoked(userID, issuedAt) {
+					writeError(w, r, apperr.New(apperr.KindUnauthorized, "token_revoked", "This session has been revoked."), s.logger)
+					return
+				}
+			}
+		}
+
 		next.ServeHTTP(w, r.WithContext(session.WithClaims(r.Context(), claims)))
 	})
 }

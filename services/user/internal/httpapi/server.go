@@ -15,6 +15,7 @@ import (
 	"typefast/services/user/internal/observability"
 	"typefast/services/user/internal/recovery"
 	"typefast/services/user/internal/register"
+	"typefast/services/user/internal/revocation"
 	"typefast/services/user/internal/session"
 )
 
@@ -34,6 +35,7 @@ type Server struct {
 	recovery      *recovery.Service
 	authorization *authorization.Service
 	tokens        *session.TokenManager
+	revocations   *revocation.Registry
 	limiter       *Limiter
 }
 
@@ -49,6 +51,7 @@ func New(
 	recoveryService *recovery.Service,
 	authorizationService *authorization.Service,
 	tokens *session.TokenManager,
+	revocations *revocation.Registry,
 ) *Server {
 	if metrics == nil {
 		metrics = observability.NoopMetrics{}
@@ -66,6 +69,7 @@ func New(
 		recovery:      recoveryService,
 		authorization: authorizationService,
 		tokens:        tokens,
+		revocations:   revocations,
 		limiter:       newLimiter(cfg.RateLimit),
 	}
 }

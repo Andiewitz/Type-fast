@@ -14,27 +14,28 @@ import (
 )
 
 type Config struct {
-	Env            string
-	Port           string
-	DatabaseURL    string
-	AppOrigin      string
-	PublicAppURL   string
-	JWTPrivateKey  ed25519.PrivateKey
-	JWTKeyID       string
-	JWTIssuer      string
-	JWTAudience    string
-	JWTKeyIsRandom bool
-	AccessTTL      time.Duration
-	RefreshTTL     time.Duration
-	CookieSecure   bool
-	CookieDomain   string
-	Mailer         string
-	SMTPAddr       string
-	MailFrom       string
-	InternalToken  string
-	RateLimit      bool
-	LogLevel       slog.Level
-	AutoMigrate    bool
+	Env               string
+	Port              string
+	DatabaseURL       string
+	AppOrigin         string
+	PublicAppURL      string
+	JWTPrivateKey     ed25519.PrivateKey
+	JWTKeyID          string
+	JWTIssuer         string
+	JWTAudience       string
+	JWTKeyIsRandom    bool
+	AccessTTL         time.Duration
+	RefreshTTL        time.Duration
+	CookieSecure      bool
+	CookieDomain      string
+	Mailer            string
+	SMTPAddr          string
+	MailFrom          string
+	InternalToken     string
+	RateLimit         bool
+	LogLevel          slog.Level
+	AutoMigrate       bool
+	RevocationRefresh time.Duration
 }
 
 func Load() (Config, error) {
@@ -90,6 +91,14 @@ func Load() (Config, error) {
 	cfg.AutoMigrate, err = boolEnv("AUTO_MIGRATE", false)
 	if err != nil {
 		return Config{}, err
+	}
+
+	cfg.RevocationRefresh, err = durationEnv("REVOCATION_REFRESH_INTERVAL", 5*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+	if cfg.RevocationRefresh <= 0 {
+		return Config{}, errors.New("REVOCATION_REFRESH_INTERVAL must be positive")
 	}
 
 	level, err := logLevel(getenv("LOG_LEVEL", "info"))

@@ -21,6 +21,7 @@ import (
 	"typefast/services/user/internal/outbox"
 	"typefast/services/user/internal/recovery"
 	"typefast/services/user/internal/register"
+	"typefast/services/user/internal/revocation"
 	"typefast/services/user/internal/session"
 	"typefast/services/user/internal/storage/migrations"
 	"typefast/services/user/internal/storage/postgres"
@@ -81,6 +82,14 @@ func run() error {
 		return err
 	}
 
+	// Load bans recorded before startup, then keep the snapshot fresh. A failed
+	// initial load fails startup rather than serving with unknown revocations.
+	revocations := revocation.NewRegistry(store, logger)
+	if err := revocations.Refresh(ctx); err != nil {
+		return err
+	}
+	go revocations.Run(ctx, cfg.RevocationRefresh)
+
 	tokens, err := session.NewTokenManager(cfg.JWTPrivateKey, cfg.JWTKeyID, cfg.JWTIssuer, cfg.JWTAudience, cfg.AccessTTL)
 	if err != nil {
 		return err
@@ -91,7 +100,7 @@ func run() error {
 	loginService := login.NewService(store, sessionService, store, logger)
 	accountService := account.NewService(store, store, logger)
 	recoveryService := recovery.NewService(store, cfg.PublicAppURL, store, logger)
-	authorizationService := authorization.NewService(store, store, logger)
+	authorizationService := authorization.NewService(store, store, revocations, logger)
 
 	var sender mailer.Mailer = &mailer.Log{Logger: logger}
 	if cfg.Mailer == "smtp" {
@@ -119,6 +128,7 @@ func run() error {
 		recoveryService,
 		authorizationService,
 		tokens,
+		revocations,
 	)
 
 	listenAddr := *addr

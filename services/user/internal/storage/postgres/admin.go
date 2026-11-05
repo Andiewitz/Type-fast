@@ -56,9 +56,13 @@ func (s *Store) SetUserStatus(ctx context.Context, id uuid.UUID, status identity
 	}
 	defer tx.Rollback(ctx)
 
+	// Suspension is a ban: it locks the account and marks every token issued
+	// so far as invalid, in the same transaction that revokes its sessions.
 	user, err := scanUser(tx.QueryRow(ctx, `
 		UPDATE users
-		SET status = $2, updated_at = now()
+		SET status = $2,
+		    revoked_before = CASE WHEN $2::text = 'suspended' THEN now() ELSE revoked_before END,
+		    updated_at = now()
 		WHERE id = $1 AND deleted_at IS NULL
 		RETURNING `+userColumns,
 		id, string(status),
