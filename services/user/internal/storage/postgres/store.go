@@ -80,6 +80,7 @@ func scanUser(row pgx.Row) (identity.User, error) {
 		&user.UpdatedAt,
 		&user.DeletedAt,
 		&user.CognitoSub,
+		&user.RevokedBefore,
 	)
 	if err != nil {
 		return identity.User{}, err
@@ -103,6 +104,7 @@ func scanUserRows(rows pgx.Rows) (identity.User, error) {
 		&user.UpdatedAt,
 		&user.DeletedAt,
 		&user.CognitoSub,
+		&user.RevokedBefore,
 	)
 	if err != nil {
 		return identity.User{}, err
@@ -111,4 +113,4 @@ func scanUserRows(rows pgx.Rows) (identity.User, error) {
 	return user, nil
 }
 
-const userColumns = `id, email, password_hash, status, display_name, email_verified_at, last_login_at, created_at, updated_at, deleted_at, COALESCE(cognito_sub, '') AS cognito_sub`
+const userColumns = `id, email, password_hash, status, display_name, email_verified_at, last_login_at, created_at, updated_at, deleted_at, COALESCE(cognito_sub, '') AS cognito_sub, revoked_before`
