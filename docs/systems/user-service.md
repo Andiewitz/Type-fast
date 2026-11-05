@@ -92,7 +92,20 @@ Duplicate registration returns the same `202` response as a new registration.
 - Logout revokes the current session.
 - Users can revoke individual sessions from `/v1/account/sessions`.
 - Suspension and password reset revoke active sessions.
-- Access tokens are not introspected per request and remain valid until their 15-minute expiry.
+- Access tokens are checked against a revocation snapshot, so a ban or forced sign-out takes effect on the next request.
+
+### Bans and token revocation
+
+Access tokens are verified offline, so nothing can recall one after it is signed. Suspending an account therefore does three things in a single transaction: sets `status = 'suspended'` (blocks login), revokes every session (blocks refresh), and stamps `users.revoked_before = now()`.
+
+Each replica keeps an in-memory snapshot of accounts that carry a revocation marker. A request is rejected with `401 token_revoked` when its token was issued at or before that marker.
+
+- The replica that performs a ban applies it immediately; other replicas reload the snapshot every `REVOCATION_REFRESH_INTERVAL` (default `5s`).
+- The check is a map lookup per authenticated request: it adds no database load and its memory follows the number of revoked accounts, not the number of users.
+- JWT issued-at has one-second resolution, so a token minted in the same second as the ban is allowed. The exposure window is under a second; the comparison deliberately favours not locking out a freshly signed-in user.
+- Reactivating an account restores sign-in but never resurrects tokens issued before the ban, because the marker is kept.
+- A failed refresh keeps the previous snapshot, so a database hiccup cannot silently un-ban anyone. A failed initial load stops startup.
+- Bans are enforced for this API only. Cognito's `AdminUserGlobalSignOut` and `AdminDisableUser` are not called yet; wiring them would additionally invalidate Cognito refresh tokens and require an AWS SDK dependency.
 
 ### Password recovery
 
@@ -185,6 +198,7 @@ No metrics or tracing exporter is configured yet.
 | `MAIL_FROM` | `no-reply@kit.local` | Envelope sender |
 | `INTERNAL_SERVICE_TOKEN` | empty | Enables internal authz endpoint |
 | `RATE_LIMIT_ENABLED` | `true` | In-memory rate limiting |
+| `REVOCATION_REFRESH_INTERVAL` | `5s` | How often replicas reload the revocation snapshot |
 | `LOG_LEVEL` | `info` | debug, info, warn, error |
 | `AUTO_MIGRATE` | `false` | Apply migrations at API startup |
 
@@ -192,7 +206,7 @@ From the repository root, generate a key with `go run ./services/user/cmd/keygen
 
 ## Deployment notes
 
-- Access tokens are bearer JWTs and are valid until expiry after logout, suspension, or password reset, so keep `ACCESS_TOKEN_TTL` short.
+- A ban or forced sign-out lands on the next request through the revocation snapshot; a replica picks up bans written elsewhere within `REVOCATION_REFRESH_INTERVAL`.
 - Internal authorization reflects the account's current status and roles, but permission claims in the clients access token can be up to 15 minutes stale.
 - The refresh cookie is hardcoded to `SameSite=Lax`; this works when app and API are the same site. If app and API are on different registrable domains, add a configurable `SameSite=None; Secure` option first.
 - IP-based rate limits and audit entries use the TCP peer address. Because they do not trust proxy headers yet, either terminate traffic direct at this service or add trusted-proxy handling before deploying behind a load balancer.
