@@ -117,6 +117,21 @@ func TestCognitoStoreIgnoresSoftDeletedUsers(t *testing.T) {
 	if !apperr.IsKind(err, apperr.KindNotFound) || apperr.Code(err) != "user_not_found" {
 		t.Fatalf("deleted link error = %v, want not found user_not_found", err)
 	}
+
+	// A deleted account keeps its subject, so signing in again is refused
+	// instead of silently creating a second account for the same person.
+	_, err = h.store.CreateUserFromCognito(ctx, identity.User{Email: "reborn@example.com"}, sub)
+	if !apperr.IsKind(err, apperr.KindConflict) || apperr.Code(err) != "cognito_sub_taken" {
+		t.Fatalf("reuse of deleted subject error = %v, want conflict cognito_sub_taken", err)
+	}
+
+	var holders int
+	if err := h.pool.QueryRow(ctx, `SELECT count(*) FROM users WHERE cognito_sub = $1`, sub).Scan(&holders); err != nil {
+		t.Fatal(err)
+	}
+	if holders != 1 {
+		t.Fatalf("rows holding sub %q = %d, want only the deleted account", sub, holders)
+	}
 }
 
 func TestCognitoStoreLinksExistingUser(t *testing.T) {
@@ -173,5 +188,113 @@ func TestCognitoStoreLinksExistingUser(t *testing.T) {
 	localLogin := h.login(t, "local@example.com", password)
 	if localLogin.AccessToken == "" {
 		t.Fatal("linked user must still be able to log in locally")
+	}
+}
+
+// A rejected create must not leave a partial account behind.
+func TestCognitoStoreLeavesNoTraceOnRejectedCreate(t *testing.T) {
+	h := newHarness(t)
+	ctx := context.Background()
+	sub := "sub-" + uuid.NewString()
+
+	owner, err := h.store.CreateUserFromCognito(ctx, identity.User{Email: "owner@example.com"}, sub)
+	if err != nil {
+		t.Fatalf("create owner: %v", err)
+	}
+
+	// Same subject, new email: the second account must not be created.
+	_, err = h.store.CreateUserFromCognito(ctx, identity.User{Email: "intruder@example.com"}, sub)
+	if !apperr.IsKind(err, apperr.KindConflict) || apperr.Code(err) != "cognito_sub_taken" {
+		t.Fatalf("duplicate sub error = %v, want conflict cognito_sub_taken", err)
+	}
+
+	// Same email, new subject: no second identity may be attached.
+	_, err = h.store.CreateUserFromCognito(ctx, identity.User{Email: "owner@example.com"}, "other-"+sub)
+	if !apperr.IsKind(err, apperr.KindConflict) || apperr.Code(err) != "email_exists" {
+		t.Fatalf("duplicate email error = %v, want conflict email_exists", err)
+	}
+
+	// Blank input is rejected before it reaches the database.
+	_, err = h.store.CreateUserFromCognito(ctx, identity.User{Email: "blank@example.com"}, "   ")
+	if !apperr.IsKind(err, apperr.KindValidation) {
+		t.Fatalf("blank sub error = %v, want validation", err)
+	}
+	_, err = h.store.CreateUserFromCognito(ctx, identity.User{Email: "  "}, "sub-"+uuid.NewString())
+	if !apperr.IsKind(err, apperr.KindValidation) {
+		t.Fatalf("blank email error = %v, want validation", err)
+	}
+
+	var total int
+	if err := h.pool.QueryRow(ctx, `SELECT count(*) FROM users`).Scan(&total); err != nil {
+		t.Fatal(err)
+	}
+	if total != 1 {
+		t.Fatalf("user rows after rejected creates = %d, want 1", total)
+	}
+
+	var storedEmail string
+	var storedSub *string
+	if err := h.pool.QueryRow(ctx, `SELECT email, cognito_sub FROM users WHERE id = $1`, owner.ID).Scan(&storedEmail, &storedSub); err != nil {
+		t.Fatal(err)
+	}
+	if storedEmail != "owner@example.com" {
+		t.Fatalf("owner email = %q, want the original account unchanged", storedEmail)
+	}
+	if storedSub == nil || *storedSub != sub {
+		t.Fatalf("owner sub = %v, want %q", storedSub, sub)
+	}
+}
+
+// A rejected link must not move a subject between accounts or write a timestamp.
+func TestCognitoStoreLeavesStateOnRejectedLink(t *testing.T) {
+	h := newHarness(t)
+	ctx := context.Background()
+	password := "correct horse battery staple"
+	sub := "sub-" + uuid.NewString()
+
+	local := h.registerAndVerify(t, "linked@example.com", password)
+	userID, err := uuid.Parse(local.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	other := h.registerAndVerify(t, "other@example.com", password)
+	otherID, err := uuid.Parse(other.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	linked, err := h.store.LinkCognitoSub(ctx, userID, sub)
+	if err != nil {
+		t.Fatalf("link: %v", err)
+	}
+	linkedAt := linked.UpdatedAt
+
+	// Another account claiming the subject leaves that account unlinked.
+	_, err = h.store.LinkCognitoSub(ctx, otherID, sub)
+	if !apperr.IsKind(err, apperr.KindConflict) || apperr.Code(err) != "cognito_sub_taken" {
+		t.Fatalf("second claim error = %v, want conflict cognito_sub_taken", err)
+	}
+	otherAfter, err := h.store.GetUserByID(ctx, otherID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if otherAfter.CognitoSub != "" {
+		t.Fatalf("rejected account sub = %q, want unlinked", otherAfter.CognitoSub)
+	}
+
+	// Re-pointing the owner is refused and must not touch the row.
+	_, err = h.store.LinkCognitoSub(ctx, userID, "different-"+sub)
+	if !apperr.IsKind(err, apperr.KindConflict) || apperr.Code(err) != "cognito_sub_already_linked" {
+		t.Fatalf("repoint error = %v, want conflict cognito_sub_already_linked", err)
+	}
+	localAfter, err := h.store.GetUserByID(ctx, userID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if localAfter.CognitoSub != sub {
+		t.Fatalf("owner sub after rejected repoint = %q, want %q", localAfter.CognitoSub, sub)
+	}
+	if !localAfter.UpdatedAt.Equal(linkedAt) {
+		t.Fatalf("rejected link wrote updated_at: %v -> %v", linkedAt, localAfter.UpdatedAt)
 	}
 }

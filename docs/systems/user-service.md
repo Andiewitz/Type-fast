@@ -146,7 +146,7 @@ Cognito is the public identity provider. It proves who a user is but stores no a
 - Accounts created through Cognito store `identity.PasswordHashExternal` in `password_hash`. It is not a valid hash, so local password login always fails for them.
 - `postgres.Store` exposes `CreateUserFromCognito`, `GetUserByCognitoSub`, and `LinkCognitoSub`. Conflict codes separate `cognito_sub_taken`, `cognito_sub_already_linked`, and `email_exists`; subject lookups return `cognito_identity_not_found`.
 - Linking is idempotent for the same subject and refuses to re-point an account that already has a different one.
-- Soft-deleted accounts are invisible to subject lookup and cannot be linked.
+- Soft-deleted accounts are invisible to subject lookup and cannot be linked, but they keep their `cognito_sub`. Signing in again with the same subject returns `cognito_sub_taken` until an operator restores the account or clears the link, which prevents a deleted identity from silently becoming a second account.
 
 ## Email delivery
 
