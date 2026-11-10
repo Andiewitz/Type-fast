@@ -2,10 +2,11 @@ import { Mascot } from '../Mascot'
 import { Icon } from '../Icon'
 import { SoundToggle } from '../SoundToggle'
 import { SpeedChart } from './SpeedChart'
+import { starsFor } from './stars'
 import type { LessonResultData } from './useTypingLesson'
 import './LessonResult.css'
 export function LessonResult({ index, xpReward, bestBefore, result, onRetry, onContinue }: { index: number; xpReward: number; bestBefore: number; result: LessonResultData; onRetry: () => void; onContinue: () => void }) {
-  const stars = result.passed ? (result.accuracy >= 98 ? 3 : result.accuracy >= 90 ? 2 : 1) : 0
+  const stars = starsFor(result.passed, result.accuracy)
   const newBest = result.passed && result.wpm > bestBefore
   const title = result.passed ? (index === 5 ? 'Speed check cleared!' : `Level ${index+1} cleared!`) : 'Keep practicing!'
   const message = !result.passed ? 'Reach 30 WPM to pass the speed check.' : newBest ? 'A new personal best. Rugo is cheering you on!' : 'Nice work! Every lesson builds your rhythm.'
