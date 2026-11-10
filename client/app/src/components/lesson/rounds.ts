@@ -1,9 +1,22 @@
 import type { lessons } from '../../curriculum'
+import { letterBanks } from './content/letters.ts'
+import { languageBanks } from './content/language.ts'
+import { javaBanks } from './content/java.ts'
 
 export const ROUNDS_PER_LEVEL = 10
 export type CourseLesson = (typeof lessons)[number]
 
-function shuffled<T>(values: T[], random: () => number): T[] {
+/** Each level has its own authored examples; combinations add variety on replay. */
+export const roundBanks = [...letterBanks, ...languageBanks, ...javaBanks]
+
+const leftHome = ['asd','sdf','dfg','gfd','fds','dsa','aga','sds','dfd','faf','gag','ads','sag','fad','dad','gas']
+const rightHome = ['hjk','jkl','klh','lhj','jhk','khj','lkh','hjj','jkk','kll','hhj','jkj','klk','hlh','lkl']
+const leftReach = ['qaz','wsx','edc','rfv','tgb','qwe','wer','ert','zxc','xcv','cvb','vbf','qas','wed','sxd']
+const rightReach = ['yhn','ujm','ikm','olp','yui','uio','iop','jui','klm','hnm','poi','mju','iko','lpo']
+const leftWords = ['after','grass','fast','craft','great','free','tree','seed','rest','trade','read','care','safe','face','fade','grade','react','trace','crate','treat','rare','deer','feed','red','wet','tax','wax','vex','dress','street','draft']
+const rightWords = ['jump','join','look','moon','pony','hill','jolly','milk','only','noon','pool','lily','pink','pupil','union','hull','hoop','kiln','yolk','polo','loop','lion','lump']
+
+function shuffled<T>(values: readonly T[], random: () => number): T[] {
   const result = [...values]
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1))
@@ -12,36 +25,35 @@ function shuffled<T>(values: T[], random: () => number): T[] {
   return result
 }
 
-const punctuationEndings = ['Hi, friend.', 'Yes, please.', 'Go, Rugo.', 'Well, hello.', 'Yes, I can.', 'No, thank you.', 'Red, then blue.', 'Here, look.', 'One, then two.', 'See you, friend.']
-const questionEndings = ['Ready? Yes!', 'Where? Here!', 'Can I? Yes!', 'Go? Go!', 'Who? Rugo!', 'Again? Sure!', 'Is it fun? Yes!', 'Why? Just because!', 'Now? Now!', 'All set? Yes!']
-const sentenceEndings = ['Take your time.', 'Nice work!', 'Keep going.', 'You can do it!', 'What a day!', 'That was fun.', 'Here we go!', 'See you soon.', 'Good job!', 'Let us begin.']
-
-function variation(lesson: CourseLesson, variant: number, random: () => number): string {
-  const text = lesson.text
-  const chapter = lesson.chapterIndex
-  if (chapter <= 3) return shuffled(text.split(' '), random).join(' ')
-  if (chapter === 4) return `${text} ${(lesson.levelIndex === 1 || lesson.levelIndex === 3 ? questionEndings : punctuationEndings)[variant]}`
-  if (chapter === 8) return /\d/.test(text) ? text.replace(/\d/g, digit => String((Number(digit) + variant) % 10)) : shuffled(text.split(' '), random).join(' ')
-  if (chapter === 5) return `${text} ${sentenceEndings[variant]}`
-  if (chapter === 6) return text.replace(/\d/g, digit => String((Number(digit) + variant) % 10))
-  if (chapter === 7) return text.replace(/\n/, ` ${variant + 1}\n`)
-  if (chapter >= 9 && (chapter <= 11 || /\b(?:String|int|if)\b/.test(text))) {
-    const match = text.match(/\b(?:score|scores|name|wave|add|Rugo|ready|total|first|doubleIt|Pet|pet)\b/)
-    return match ? text.replaceAll(match[0], `${match[0]}${variant}`) : text
-  }
-  if (text.includes('\n')) return text.replace(/\n/, ` ${variant + 1}\n`)
-  return `${text} ${sentenceEndings[variant]}`
+function handPractice(lesson: CourseLesson, random: () => number): string | undefined {
+  if (lesson.chapterIndex > 1) return undefined
+  const right = lesson.chapterIndex === 1
+  const choices = lesson.levelIndex === 1 ? (right ? rightReach : leftReach)
+    : lesson.levelIndex === 2 || lesson.levelIndex === 4 ? (right ? rightWords : leftWords)
+    : (right ? rightHome : leftHome)
+  return shuffled(choices, random).slice(0, 4).join(' ')
 }
 
-/** Randomize once per attempt; prompts stay stable while a round is being typed. */
+/** Select genuinely different authored examples once per attempt, with fresh skill-specific practice. */
 export function createRounds(lesson: CourseLesson, random: () => number = Math.random): string[] {
-  const variants = shuffled(Array.from({ length: ROUNDS_PER_LEVEL }, (_, i) => i), random)
-  const rounds: string[] = []
-  for (const variant of variants) {
-    let candidate = variation(lesson, variant, random)
-    for (let tries = 0; rounds.includes(candidate) && tries < 100; tries++) candidate = variation(lesson, variant, random)
-    rounds.push(candidate)
-  }
-  return rounds
+  const bank = roundBanks[lesson.chapterIndex]?.[lesson.levelIndex]
+  if (!bank || new Set(bank).size < ROUNDS_PER_LEVEL) throw new Error(`Missing round content for ${lesson.name}`)
+  const selected = shuffled([...new Set(bank)], random).slice(0, ROUNDS_PER_LEVEL)
+  return selected.map((base, index) => {
+    const parts = [base]
+    const practice = handPractice(lesson, random)
+    if (practice) parts.push(practice)
+    let text = parts.join(' ')
+    // Short examples are paired with other complete examples, never with scrambled sentence fragments.
+    for (let offset = 1; text.length < 28 && offset < selected.length; offset++) {
+      parts.push(selected[(index + offset) % selected.length])
+      text = parts.join(parts.some(part => part.includes('\n')) ? '\n' : ' ')
+    }
+    if (!practice && text.length < 55 && random() < 0.5) {
+      const extra = selected[(index + 5) % selected.length]
+      const combined = `${text}${text.includes('\n') || extra.includes('\n') ? '\n' : ' '}${extra}`
+      if (combined.length <= 85) text = combined
+    }
+    return text
+  })
 }
-
