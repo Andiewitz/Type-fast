@@ -4,7 +4,7 @@ The React app includes six home-row exercises. Complete each exercise to unlock 
 
 Progress, XP, best WPM, activity dates and daily goal totals are saved in the browser's local storage under `rugo-progress`. They are specific to the browser and origin, not synced to an account. Daily goals reset at the next local calendar day. The league page is informational until an online leaderboard is implemented; Unit 2 remains unavailable.
 
-Opening or replaying an exercise shows a brief full-screen preparation screen before the lesson. The lesson uses a focused layout; navigation and progress return when the learner goes back to the path.
+Opening an exercise from the path or Practice shows a brief full-screen preparation screen; learners can start immediately. Retrying from results begins a fresh attempt directly. The lesson uses a focused layout; navigation and progress return when the learner goes back to the path.
 
 Rugo is a reusable SVG character with independently animated head, eyes, eyebrows, mouth, body, arms, legs and tail. The learning-path mascot cycles through reusable idle, happy, curious, thinking, surprised, proud and celebration expression templates when activated. He uses a side-facing walk cycle during preparation and reacts to lesson results, with distinct eyes, brows and mouth shapes for celebration, surprise, thought and encouragement. Motion respects reduced-motion settings. On the learning path Rugo stays visible while scrolling; smaller screens use a compact corner placement. The earlier Rive and illustrated experiments are retained as source material and are not used in the app.
 
