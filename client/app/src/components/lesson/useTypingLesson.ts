@@ -3,9 +3,10 @@ import type { ComboMilestone } from './ComboFeedback'
 import { useSound } from '../../sound/SoundProvider'
 import { calculateWpm } from './scoring'
 import { canApplyEdit } from './edits'
+import type { MistakeCounts } from './mistakes'
 
 export type SpeedSample = { seconds: number; wpm: number }
-export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; samples: SpeedSample[] }
+export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; samples: SpeedSample[]; mistakes: MistakeCounts }
 export function useTypingLesson(text: string, minWpm: number, onComplete: (seconds: number, wpm: number, accuracy: number) => void) {
   const { play } = useSound()
   const [input, setInput] = useState('')
@@ -20,6 +21,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
   const runningSince = useRef<number | null>(null)
   const bankedMs = useRef(0)
   const samples = useRef<SpeedSample[]>([])
+  const mistakes = useRef<MistakeCounts>({})
   const done = input === text
   const currentTime = () => bankedMs.current + (runningSince.current === null ? 0 : Date.now() - runningSince.current)
 
@@ -40,6 +42,10 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     const added = next.slice(prefix, next.length - suffix)
     if (added.length > 0) {
       const allCorrect = [...added].every((char, i) => char === text[prefix + i])
+      for (let i = 0; i < added.length; i++) {
+        const expected = text[prefix + i]
+        if (added[i] !== expected && expected) mistakes.current[expected] = (mistakes.current[expected] || 0) + 1
+      }
       const nextCombo = attempts.combo + added.length
       const reached = [5, 10, 20, 30, 50, 75, 100].filter(n => attempts.combo < n && nextCombo >= n).pop()
       if (!allCorrect) { play('mistake'); setMilestone(null) }
@@ -78,7 +84,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     if (history.length === 0 || seconds - history[history.length - 1].seconds > 0.1) history.push({ seconds, wpm })
     else history[history.length - 1] = { seconds, wpm }
     play(passed ? 'success' : 'mistake')
-    setResult({ seconds, wpm, accuracy, passed, samples: history })
+    setResult({ seconds, wpm, accuracy, passed, samples: history, mistakes: { ...mistakes.current } })
     if (passed) onComplete(seconds, wpm, accuracy)
   }
   return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, done, finish, result }
