@@ -10,7 +10,7 @@ const steps = [
 
 export function HomeRowIntro({ onStart, onClose }: { onStart: () => void; onClose: () => void }) {
   return <main className="home-row-intro">
-    <header className="home-row-topbar"><button type="button" className="home-row-close" aria-label="Close introduction" onClick={onClose}>×</button><span>Chapter 1 · Level 1 of 3</span></header>
+    <header className="home-row-topbar"><button type="button" className="home-row-close" aria-label="Close introduction" onClick={onClose}>×</button><span>Chapter 1 · Level 1 of 5</span></header>
     <div className="home-row-content">
       <aside className="home-row-coach"><p>Psst, feel the little bumps on F and J? That’s your home base.</p><Mascot mood="happy" /></aside>
       <section className="home-row-lesson" aria-labelledby="home-row-title">

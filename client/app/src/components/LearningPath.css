@@ -7,3 +7,11 @@
   .chapter-path .mascot-wrap .mascot:not(.mascot-small) { width: 60px; height: 60px; }
   .chapter-path .mascot-message { display: none; }
 }
+/* Keep the original circular path, with readable locked labels and stable offsets per visit. */
+.chapter-levels .level, .chapter-levels .current-level { left: clamp(-65px, var(--node-offset), 65px); }
+.chapter-levels .level { color: #312a4e; }
+.chapter-levels .level-circle.locked { color: #41385d; }
+.chapter-section .unit.next { color: #332b50; }
+@media (max-width: 600px) { .chapter-levels .level, .chapter-levels .current-level { left: clamp(-35px, var(--node-offset), 35px); } }
+.chapter-levels .level-circle.available { background: #6c4dff; border-bottom: 7px solid #4a2fd1; color: white; }
+.chapter-section .unit.next strong { background: #c5bfdf; color: #251e3c; }

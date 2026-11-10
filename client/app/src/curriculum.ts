@@ -1,7 +1,7 @@
 export type Chapter = { title: string; difficulty: number; caseSensitive: boolean; focus: string; tips: string[]; drills: { name: string; text: string }[] }
 
 /** The order introduces keys, text conventions, and Java syntax one step at a time. */
-export const chapters: Chapter[] = [
+const baseChapters: Chapter[] = [
   { title:'Left hand letters', difficulty:1, caseSensitive:false, focus:'Get comfortable reaching with your left hand.', tips:['Rest your left index finger on F.', 'Reach for each key and return to your home row.', 'Capital letters count the same as lowercase in this chapter.'], drills:[
     {name:'Home row: A to G', text:'aaa sss ddd fff ggg asdf fdsa'},
     {name:'Reach up and down', text:'qwe rtt zxc vb qaz wsx edc rfv'},
@@ -55,6 +55,25 @@ export const chapters: Chapter[] = [
     {name:'Notes', text:'Plan #2\n\tPack 3 bags.\n\tSave 10% for later.'},
     {name:'Final challenge', text:'String pet = "Rugo";\nif (score >= 90) {\n\tSystem.out.println(pet);\n}'} ] },
 ]
+
+const extraDrills: Chapter['drills'][] = [
+  [{name:'Left-hand rhythm',text:'asdf gfds fdsa asdf'}, {name:'Left-hand review',text:'great free street after'}],
+  [{name:'Right-hand rhythm',text:'hjkl lkjh jklh hjkl'}, {name:'Right-hand review',text:'jolly kiln hoop moon'}],
+  [{name:'Word pairs',text:'small steps bring great things'}, {name:'Both-hand review',text:'keep your hands on the home row'}],
+  [{name:'Capital names',text:'Rugo Maya Leo Nora Felix'}, {name:'Capital review',text:'Today We Practice With Rugo'}],
+  [{name:'Question marks',text:'Ready? How are you? Yes!'}, {name:'Punctuation review',text:'Hello, Rugo. Ready? Yes!'}],
+  [{name:'Two sentences',text:'Rugo likes books. He reads every day.'}, {name:'Sentence review',text:'Hello, friend! Are you ready to type?'}],
+  [{name:'Number groups',text:'12 34 56 78 90 123 456'}, {name:'Number review',text:'On day 12, I read 3 books.'}],
+  [{name:'Line breaks',text:'One line.\nAnother line.'}, {name:'Whitespace review',text:'Notes\n\tFirst item.\n\tSecond item.'}],
+  [{name:'More symbols',text:'@home #5 $10 25%'}, {name:'Symbol review',text:'Save 15% on item #4 for $20.'}],
+  [{name:'Boolean values',text:'boolean ready = true;'}, {name:'Simple arithmetic',text:'int total = score + 5;'}],
+  [{name:'Array access',text:'int first = scores[0];'}, {name:'Conditional review',text:'if (score >= 10) { ready = true; }'}],
+  [{name:'Class fields',text:'class Pet {\n\tString name = "Rugo";\n}'}, {name:'Method review',text:'int doubleIt(int a) {\n\treturn a * 2;\n}'}],
+  [{name:'Mixed punctuation',text:'Hello, Rugo! You saved 20% on #3.'}, {name:'Mixed code',text:'int score = 42;\nif (score > 10) {\n\tprint(score);\n}'}],
+]
+
+export const chapters = baseChapters.map((chapter, index) => ({ ...chapter, drills: [...chapter.drills, ...extraDrills[index]] }))
+export const LEVELS_PER_CHAPTER = 5
 
 export const lessons = chapters.flatMap((chapter, chapterIndex) => chapter.drills.map((drill, levelIndex) => ({
   ...drill, chapterIndex, levelIndex, caseSensitive: chapter.caseSensitive,

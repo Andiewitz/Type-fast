@@ -2,10 +2,10 @@ import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
 import { chapters, lessons } from '../client/app/src/curriculum.ts'
 
-test('all thirteen chapters contain three playable exercises', () => {
+test('all thirteen chapters contain five playable exercises', () => {
   assert.equal(chapters.length, 13)
-  assert.equal(lessons.length, 39)
-  assert.ok(chapters.every(chapter => chapter.drills.length === 3))
+  assert.equal(lessons.length, 65)
+  assert.ok(chapters.every(chapter => chapter.drills.length === 5))
   assert.ok(lessons.every(lesson => lesson.text.length > 0 && lesson.minWpm > 0 && lesson.maxMistakes >= 0))
 })
 test('capitalization begins at chapter four', () => {
