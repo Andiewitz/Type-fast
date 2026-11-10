@@ -4,10 +4,11 @@ import { useSound } from '../../sound/SoundProvider'
 import { calculateWpm } from './scoring'
 import { canApplyEdit } from './edits'
 import type { MistakeCounts } from './mistakes'
+import { lessonOutcome, type LessonOutcome } from './outcome'
 
 export type SpeedSample = { seconds: number; wpm: number }
-export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; samples: SpeedSample[]; mistakes: MistakeCounts }
-export function useTypingLesson(text: string, minWpm: number, onComplete: (seconds: number, wpm: number, accuracy: number) => void) {
+export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; reason: Exclude<LessonOutcome, 'in-progress' | 'passed'> | null; mistakeCount: number; samples: SpeedSample[]; mistakes: MistakeCounts }
+export function useTypingLesson(text: string, minWpm: number, maxMistakes: number, onComplete: (seconds: number, wpm: number, accuracy: number) => void) {
   const { play } = useSound()
   const [input, setInput] = useState('')
   const [paused, setPaused] = useState(false)
@@ -23,17 +24,19 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
   const samples = useRef<SpeedSample[]>([])
   const mistakes = useRef<MistakeCounts>({})
   const done = input === text
+  const mistakeCount = attempts.total - attempts.correct
+  const tooManyMistakes = mistakeCount > maxMistakes
   const currentTime = () => bankedMs.current + (runningSince.current === null ? 0 : performance.now() - runningSince.current)
   const completed = useRef(false)
 
   useEffect(() => {
-    if (!started || paused || done || result) return
+    if (!started || paused || done || tooManyMistakes || result) return
     const timer = window.setInterval(() => setElapsedMs(currentTime()), 100)
     return () => window.clearInterval(timer)
-  }, [started, paused, done, result])
+  }, [started, paused, done, tooManyMistakes, result])
 
   function change(value: string) {
-    if (paused || done || result || !canApplyEdit(input, value, text)) return
+    if (paused || done || tooManyMistakes || result || !canApplyEdit(input, value, text)) return
     if (!started && value.length > 0) { runningSince.current = performance.now(); setStarted(true) }
     const next = value.slice(0, text.length)
     let prefix = 0
@@ -41,6 +44,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     let suffix = 0
     while (suffix < input.length - prefix && suffix < next.length - prefix && input[input.length - 1 - suffix] === next[next.length - 1 - suffix]) suffix++
     const added = next.slice(prefix, next.length - suffix)
+    const newMistakes = [...added].filter((char, i) => char !== text[prefix + i]).length
     if (added.length > 0) {
       const allCorrect = [...added].every((char, i) => char === text[prefix + i])
       for (let i = 0; i < added.length; i++) {
@@ -49,7 +53,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
       }
       const nextCombo = attempts.combo + added.length
       const reached = [5, 10, 20, 30, 50, 75, 100].filter(n => attempts.combo < n && nextCombo >= n).pop()
-      if (!allCorrect) { play('mistake'); setMilestone(null) }
+      if (!allCorrect) { if (mistakeCount + newMistakes <= maxMistakes) play('mistake'); setMilestone(null) }
       else if (reached) { play(reached >= 20 ? 'bigCombo' : 'combo'); setMilestone({ count: reached, id: ++milestoneId.current }) }
       else play('tap')
       setAttempts(prev => {
@@ -67,10 +71,10 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     }
     if (next.length < input.length) setMilestone(null)
     setInput(next)
-    if (next === text) { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current) }
+    if (next === text || mistakeCount + newMistakes > maxMistakes) { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current) }
   }
   function togglePause() {
-    if (done || result) return
+    if (done || tooManyMistakes || result) return
     if (paused) { if (started) runningSince.current = performance.now(); setPaused(false) }
     else { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current); setPaused(true) }
   }
@@ -78,18 +82,20 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
   const accuracy = attempts.total ? Math.round(attempts.correct / attempts.total * 100) : 100
   const wpm = calculateWpm(correctChars, elapsedMs)
   useEffect(() => {
-    if (!done || paused || result || completed.current) return
+    const outcome = lessonOutcome(done, mistakeCount, maxMistakes, wpm, minWpm)
+    if (outcome === 'in-progress' || paused || result || completed.current) return
     completed.current = true
     const seconds = elapsedMs / 1000
-    const passed = wpm >= minWpm
+    const passed = outcome === 'passed'
+    const reason = passed ? null : outcome
     const history = [...samples.current]
     if (history.length === 0 || seconds - history[history.length - 1].seconds > 0.1) history.push({ seconds, wpm })
     else history[history.length - 1] = { seconds, wpm }
     play(passed ? 'success' : 'mistake')
-    setResult({ seconds, wpm, accuracy, passed, samples: history, mistakes: { ...mistakes.current } })
+    setResult({ seconds, wpm, accuracy, passed, reason, mistakeCount, samples: history, mistakes: { ...mistakes.current } })
     if (passed) onComplete(seconds, wpm, accuracy)
-  }, [done, paused, result, elapsedMs, wpm, accuracy, minWpm, play, onComplete])
-  return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, done, result }
+  }, [done, paused, result, elapsedMs, wpm, accuracy, minWpm, maxMistakes, mistakeCount, play, onComplete])
+  return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, mistakeCount, done, result }
 }
 
 

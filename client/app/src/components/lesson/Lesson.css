@@ -67,3 +67,10 @@
 
 .lesson-input-notice { position: absolute; bottom: 1rem; left: 1.5rem; right: 1.5rem; color: #a33430; font-weight: 700; }
 .keyboard-guide-caption { margin: 6px 0; color: #625b83; font-size: 12px; text-align: center; }
+.lesson-goals { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 4px 16px; text-align: right; }
+.lesson-goals .mistakes-warning { color: #a33039; }
+@media (max-width: 420px) {
+  .lesson-exercise-heading { display: grid; gap: 5px; }
+  .lesson-exercise-heading h1 { max-width: none; }
+  .lesson-goals { justify-content: flex-start; text-align: left; }
+}
