@@ -6,11 +6,11 @@ import { HomeRowIntro } from './lesson/HomeRowIntro'
 import { TypingKeyboard } from './lesson/TypingKeyboard'
 import { useTypingLesson } from './lesson/useTypingLesson'
 import './lesson/Lesson.css'
-function LessonAttempt({index, bestWpm, isFirstClear, onClose, onFinish, onRetry}: {index:number; bestWpm:number; isFirstClear:boolean; onClose:()=>void; onFinish:(index:number, seconds:number,wpm:number)=>void; onRetry:()=>void}) {
+function LessonAttempt({index, bestWpm, isFirstClear, onClose, onFinish, onRetry}: {index:number; bestWpm:number; isFirstClear:boolean; onClose:()=>void; onFinish:(index:number, seconds:number,wpm:number,accuracy:number)=>void; onRetry:()=>void}) {
  const bestBefore = useRef(bestWpm).current
  const xpReward = useRef(isFirstClear ? 20 : 0).current
  const lesson = lessons[index]
- const state = useTypingLesson(lesson.text, index === 5 ? 30 : 0, (seconds, wpm) => onFinish(index, seconds, wpm))
+ const state = useTypingLesson(lesson.text, index === 5 ? 30 : 0, (seconds, wpm, accuracy) => onFinish(index, seconds, wpm, accuracy))
  const hasError = [...state.input].some((char, i) => char !== lesson.text[i])
  const inputRef = useRef<HTMLTextAreaElement>(null)
  const [inputNotice, setInputNotice] = useState('')
@@ -21,7 +21,7 @@ function LessonAttempt({index, bestWpm, isFirstClear, onClose, onFinish, onRetry
 }
 
 
-export function Lesson(props: {index:number; bestWpm:number; isFirstClear:boolean; showIntro?:boolean; onClose:()=>void; onFinish:(index:number, seconds:number,wpm:number)=>void}) {
+export function Lesson(props: {index:number; bestWpm:number; isFirstClear:boolean; showIntro?:boolean; onClose:()=>void; onFinish:(index:number, seconds:number,wpm:number,accuracy:number)=>void}) {
  const [attempt, setAttempt] = useState(0)
  const [showIntro, setShowIntro] = useState(Boolean(props.showIntro))
  if (showIntro) return <HomeRowIntro onStart={() => setShowIntro(false)} onClose={props.onClose}/>

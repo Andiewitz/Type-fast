@@ -6,7 +6,7 @@ import { canApplyEdit } from './edits'
 
 export type SpeedSample = { seconds: number; wpm: number }
 export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; samples: SpeedSample[] }
-export function useTypingLesson(text: string, minWpm: number, onComplete: (seconds: number, wpm: number) => void) {
+export function useTypingLesson(text: string, minWpm: number, onComplete: (seconds: number, wpm: number, accuracy: number) => void) {
   const { play } = useSound()
   const [input, setInput] = useState('')
   const [paused, setPaused] = useState(false)
@@ -79,7 +79,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     else history[history.length - 1] = { seconds, wpm }
     play(passed ? 'success' : 'mistake')
     setResult({ seconds, wpm, accuracy, passed, samples: history })
-    if (passed) onComplete(seconds, wpm)
+    if (passed) onComplete(seconds, wpm, accuracy)
   }
   return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, done, finish, result }
 }
