@@ -4,6 +4,7 @@ import { useSound } from '../../sound/SoundProvider'
 import { calculateWpm } from './scoring'
 import { canApplyEdit } from './edits'
 import type { MistakeCounts } from './mistakes'
+import { MIN_LESSON_MS, remainingLessonMs } from './lessonTiming'
 
 export type SpeedSample = { seconds: number; wpm: number }
 export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; samples: SpeedSample[]; mistakes: MistakeCounts }
@@ -23,17 +24,25 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
   const samples = useRef<SpeedSample[]>([])
   const mistakes = useRef<MistakeCounts>({})
   const done = input === text
-  const currentTime = () => bankedMs.current + (runningSince.current === null ? 0 : Date.now() - runningSince.current)
+  const currentTime = () => bankedMs.current + (runningSince.current === null ? 0 : performance.now() - runningSince.current)
+  const canFinish = done && !paused && remainingLessonMs(elapsedMs) === 0
 
   useEffect(() => {
-    if (!started || paused || done || result) return
-    const timer = window.setInterval(() => setElapsedMs(currentTime()), 100)
+    if (!started || paused || result || canFinish) return
+    const timer = window.setInterval(() => {
+      const elapsed = currentTime()
+      if (done && elapsed >= MIN_LESSON_MS) {
+        bankedMs.current = MIN_LESSON_MS
+        runningSince.current = null
+        setElapsedMs(MIN_LESSON_MS)
+      } else setElapsedMs(elapsed)
+    }, 100)
     return () => window.clearInterval(timer)
-  }, [started, paused, done, result])
+  }, [started, paused, done, result, canFinish])
 
   function change(value: string) {
     if (paused || done || result || !canApplyEdit(input, value, text)) return
-    if (!started && value.length > 0) { runningSince.current = Date.now(); setStarted(true) }
+    if (!started && value.length > 0) { runningSince.current = performance.now(); setStarted(true) }
     const next = value.slice(0, text.length)
     let prefix = 0
     while (prefix < input.length && prefix < next.length && input[prefix] === next[prefix]) prefix++
@@ -66,18 +75,18 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     }
     if (next.length < input.length) setMilestone(null)
     setInput(next)
-    if (next === text) { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current) }
+    if (next === text && currentTime() >= MIN_LESSON_MS) { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current) }
   }
   function togglePause() {
-    if (done || result) return
-    if (paused) { if (started) runningSince.current = Date.now(); setPaused(false) }
+    if (result || (done && remainingLessonMs(elapsedMs) === 0)) return
+    if (paused) { if (started) runningSince.current = performance.now(); setPaused(false) }
     else { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current); setPaused(true) }
   }
   const correctChars = [...input].reduce((n, char, i) => n + Number(char === text[i]), 0)
   const accuracy = attempts.total ? Math.round(attempts.correct / attempts.total * 100) : 100
   const wpm = calculateWpm(correctChars, elapsedMs)
   function finish() {
-    if (!done || result) return
+    if (!done || paused || result || remainingLessonMs(currentTime()) > 0) return
     const seconds = Math.max(1, elapsedMs / 1000)
     const passed = wpm >= minWpm
     const history = [...samples.current]
@@ -87,7 +96,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     setResult({ seconds, wpm, accuracy, passed, samples: history, mistakes: { ...mistakes.current } })
     if (passed) onComplete(seconds, wpm, accuracy)
   }
-  return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, done, finish, result }
+  return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, done, canFinish, remainingMs: remainingLessonMs(elapsedMs), finish, result }
 }
 
 
