@@ -1,7 +1,5 @@
-export const MIN_SPEED_SECONDS = 5
-
-/** Short exercises use a minimum window to avoid inflated speed records. */
+/** Calculate words per minute from the actual active typing time. */
 export function calculateWpm(correctCharacters: number, elapsedMs: number): number {
   if (correctCharacters <= 0 || elapsedMs <= 0) return 0
-  return Math.round((correctCharacters / 5) / (Math.max(elapsedMs / 1000, MIN_SPEED_SECONDS) / 60))
+  return Math.round((correctCharacters / 5) / (elapsedMs / 60000))
 }

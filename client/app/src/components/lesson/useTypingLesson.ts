@@ -4,7 +4,6 @@ import { useSound } from '../../sound/SoundProvider'
 import { calculateWpm } from './scoring'
 import { canApplyEdit } from './edits'
 import type { MistakeCounts } from './mistakes'
-import { MIN_LESSON_MS, remainingLessonMs } from './lessonTiming'
 
 export type SpeedSample = { seconds: number; wpm: number }
 export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; samples: SpeedSample[]; mistakes: MistakeCounts }
@@ -25,20 +24,13 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
   const mistakes = useRef<MistakeCounts>({})
   const done = input === text
   const currentTime = () => bankedMs.current + (runningSince.current === null ? 0 : performance.now() - runningSince.current)
-  const canFinish = done && !paused && remainingLessonMs(elapsedMs) === 0
+  const completed = useRef(false)
 
   useEffect(() => {
-    if (!started || paused || result || canFinish) return
-    const timer = window.setInterval(() => {
-      const elapsed = currentTime()
-      if (done && elapsed >= MIN_LESSON_MS) {
-        bankedMs.current = MIN_LESSON_MS
-        runningSince.current = null
-        setElapsedMs(MIN_LESSON_MS)
-      } else setElapsedMs(elapsed)
-    }, 100)
+    if (!started || paused || done || result) return
+    const timer = window.setInterval(() => setElapsedMs(currentTime()), 100)
     return () => window.clearInterval(timer)
-  }, [started, paused, done, result, canFinish])
+  }, [started, paused, done, result])
 
   function change(value: string) {
     if (paused || done || result || !canApplyEdit(input, value, text)) return
@@ -75,19 +67,20 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     }
     if (next.length < input.length) setMilestone(null)
     setInput(next)
-    if (next === text && currentTime() >= MIN_LESSON_MS) { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current) }
+    if (next === text) { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current) }
   }
   function togglePause() {
-    if (result || (done && remainingLessonMs(elapsedMs) === 0)) return
+    if (done || result) return
     if (paused) { if (started) runningSince.current = performance.now(); setPaused(false) }
     else { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current); setPaused(true) }
   }
   const correctChars = [...input].reduce((n, char, i) => n + Number(char === text[i]), 0)
   const accuracy = attempts.total ? Math.round(attempts.correct / attempts.total * 100) : 100
   const wpm = calculateWpm(correctChars, elapsedMs)
-  function finish() {
-    if (!done || paused || result || remainingLessonMs(currentTime()) > 0) return
-    const seconds = Math.max(1, elapsedMs / 1000)
+  useEffect(() => {
+    if (!done || paused || result || completed.current) return
+    completed.current = true
+    const seconds = elapsedMs / 1000
     const passed = wpm >= minWpm
     const history = [...samples.current]
     if (history.length === 0 || seconds - history[history.length - 1].seconds > 0.1) history.push({ seconds, wpm })
@@ -95,8 +88,8 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
     play(passed ? 'success' : 'mistake')
     setResult({ seconds, wpm, accuracy, passed, samples: history, mistakes: { ...mistakes.current } })
     if (passed) onComplete(seconds, wpm, accuracy)
-  }
-  return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, done, canFinish, remainingMs: remainingLessonMs(elapsedMs), finish, result }
+  }, [done, paused, result, elapsedMs, wpm, accuracy, minWpm, play, onComplete])
+  return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, done, result }
 }
 
 
