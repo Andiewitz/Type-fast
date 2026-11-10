@@ -74,3 +74,4 @@
   .lesson-exercise-heading h1 { max-width: none; }
   .lesson-goals { justify-content: flex-start; text-align: left; }
 }
+.lesson-insert-tab { display: block; margin: 12px auto 0; padding: 9px 16px; border: 2px solid #dcd8f2; border-radius: 12px; background: white; color: #4a2fd1; font-weight: 800; }

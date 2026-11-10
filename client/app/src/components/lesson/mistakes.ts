@@ -5,5 +5,8 @@ export function mostMissedKey(counts: MistakeCounts): string | undefined {
 }
 
 export function describeKey(key: string): string {
-  return key === ' ' ? 'space' : key.toUpperCase()
+  if (key === ' ') return 'space'
+  if (key === '\n') return 'Enter'
+  if (key === '\t') return 'Tab'
+  return key.toUpperCase()
 }

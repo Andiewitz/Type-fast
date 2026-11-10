@@ -3,12 +3,13 @@ import type { ComboMilestone } from './ComboFeedback'
 import { useSound } from '../../sound/SoundProvider'
 import { calculateWpm } from './scoring'
 import { canApplyEdit } from './edits'
+import { normalizeLessonInput } from './characters'
 import type { MistakeCounts } from './mistakes'
 import { lessonOutcome, type LessonOutcome } from './outcome'
 
 export type SpeedSample = { seconds: number; wpm: number }
 export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; reason: Exclude<LessonOutcome, 'in-progress' | 'passed'> | null; mistakeCount: number; samples: SpeedSample[]; mistakes: MistakeCounts }
-export function useTypingLesson(text: string, minWpm: number, maxMistakes: number, onComplete: (seconds: number, wpm: number, accuracy: number) => void) {
+export function useTypingLesson(text: string, minWpm: number, maxMistakes: number, caseSensitive: boolean, onComplete: (seconds: number, wpm: number, accuracy: number) => void) {
   const { play } = useSound()
   const [input, setInput] = useState('')
   const [paused, setPaused] = useState(false)
@@ -35,7 +36,8 @@ export function useTypingLesson(text: string, minWpm: number, maxMistakes: numbe
     return () => window.clearInterval(timer)
   }, [started, paused, done, tooManyMistakes, result])
 
-  function change(value: string) {
+  function change(rawValue: string) {
+    const value = normalizeLessonInput(rawValue, caseSensitive)
     if (paused || done || tooManyMistakes || result || !canApplyEdit(input, value, text)) return
     if (!started && value.length > 0) { runningSince.current = performance.now(); setStarted(true) }
     const next = value.slice(0, text.length)
