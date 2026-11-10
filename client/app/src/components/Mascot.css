@@ -57,3 +57,30 @@
   .mascot-character.mood-surprised .rugo-head, .mascot-character.mood-proud .rugo-head,
   .mascot-character.mood-proud .rugo-body { animation: none !important; }
 }
+
+/* Facial poses are intentionally distinct even when the character is small. */
+.mascot-character .rugo-brow-left, .mascot-character .rugo-brow-right { transform-box:view-box; transition:transform 180ms cubic-bezier(.23,1,.32,1); }
+.mascot-character .rugo-brow-left { transform-origin:68px 49px; }
+.mascot-character .rugo-brow-right { transform-origin:132px 49px; }
+.mascot-character.mood-curious .rugo-brow-left { transform:translateY(-5px) rotate(-8deg); }
+.mascot-character.mood-curious .rugo-brow-right { transform:translateY(2px) rotate(5deg); }
+.mascot-character.mood-thinking .rugo-brow-left { transform:translateY(-3px) rotate(-8deg); }
+.mascot-character.mood-thinking .rugo-brow-right { transform:translateY(3px) rotate(-10deg); }
+.mascot-character.mood-encourage .rugo-brow-left { transform:translateY(-2px) rotate(8deg); }
+.mascot-character.mood-encourage .rugo-brow-right { transform:translateY(-2px) rotate(-8deg); }
+.mascot-character.mood-celebrate .rugo-eye { animation:none; }
+.mascot-character.mood-celebrate .rugo-head { animation:rugo-cheer-head 550ms ease-in-out 3 alternate; }
+.mascot-character.mood-celebrate .rugo-arm-left { animation:rugo-cheer-left 550ms ease-in-out 3 alternate; }
+.mascot-character.mood-celebrate .rugo-arm-right { animation:rugo-cheer-right 550ms ease-in-out 3 alternate; }
+.mascot-character.mood-celebrate .rugo-sparkles { animation:rugo-sparkle 550ms ease-in-out 3 alternate; transform-box:view-box; transform-origin:100px 50px; }
+.mascot-character.mood-encourage .rugo-head { animation:rugo-support 600ms cubic-bezier(.23,1,.32,1) both; }
+.mascot-character.mood-encourage .rugo-arm-right { transform:rotate(-35deg); }
+@keyframes rugo-cheer-head { from { transform:rotate(-6deg) translateY(0); } to { transform:rotate(6deg) translateY(-7px); } }
+@keyframes rugo-cheer-left { from { transform:rotate(35deg); } to { transform:rotate(75deg); } }
+@keyframes rugo-cheer-right { from { transform:rotate(-35deg); } to { transform:rotate(-75deg); } }
+@keyframes rugo-sparkle { from { opacity:.55; transform:scale(.9); } to { opacity:1; transform:scale(1.06); } }
+@keyframes rugo-support { from { transform:rotate(0); } to { transform:rotate(-7deg); } }
+@media (prefers-reduced-motion:reduce) {
+  .mascot-character .rugo-brow-left, .mascot-character .rugo-brow-right { transition:none; }
+  .mascot-character.mood-celebrate .rugo-sparkles, .mascot-character.mood-encourage .rugo-head { animation:none; }
+}
