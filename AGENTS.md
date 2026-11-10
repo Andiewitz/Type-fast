@@ -4,6 +4,7 @@ All agents should operate the kit the same way.
 
 - Read the relevant files before editing anything.
 - Keep the existing architecture. Prefer extending over replacing.
+- Compartmentalize UI by responsibility: keep page orchestration in pages, reusable interface elements in focused components, and feature-specific styles or logic alongside their components when practical. Avoid mixing unrelated concerns in one component.
 - Keep backwards compatibility unless the user explicitly asks to break it.
 - Always rewrite or regenerate docs when behavior changes.
 - Do not create throwaway files unless the user asks for them.

@@ -1,0 +1,19 @@
+.lesson-loading { min-height: 100vh; min-height: 100dvh; padding: 28px 32px; display: flex; justify-content: center; align-items: center; background: #f4f2ff; }
+.lesson-loading-card { width: 100%; max-width: 640px; padding: 36px 28px 40px; text-align: center; background: #fff; border: 2px solid #e3dffb; border-bottom-width: 5px; border-radius: 20px; }
+.lesson-loading-art { width: 190px; margin: 0 auto 24px; }
+.walking-rugo { transform-origin: 50% 90%; animation: rugo-walk 500ms ease-in-out infinite alternate; }
+.walking-rugo .mascot { display: block; margin: 0 auto; }
+.walking-rugo .mascot-foot-left, .walking-rugo .mascot-foot-right { transform-box: fill-box; transform-origin: center; animation: rugo-step 500ms ease-in-out infinite alternate; }
+.walking-rugo .mascot-foot-right { animation-direction: alternate-reverse; }
+.walking-ground { width: 150px; height: 6px; margin: -5px auto 0; border-radius: 999px; background: #e3dffb; }
+.lesson-loading-card h1 { margin: 0; font: 600 28px/1.2 Fredoka, sans-serif; }
+.lesson-loading-card p { min-height: 24px; margin: 12px 0 26px; color: #5e5a80; font-size: 16px; font-weight: 700; }
+.lesson-loading-track { max-width: 360px; height: 14px; margin: 0 auto; overflow: hidden; border-radius: 999px; background: #e3dffb; }
+.lesson-loading-fill { width: 100%; height: 100%; border-radius: inherit; background: #6c4dff; transform-origin: left center; transition: transform 80ms linear; }
+.lesson-loading-caption { display: block; margin-top: 12px; color: #5e5a80; font-size: 13px; font-weight: 800; }
+@keyframes rugo-walk { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-7px) rotate(3deg); } }
+@keyframes rugo-step { from { transform: translateX(-5px) rotate(-12deg); } to { transform: translateX(5px) rotate(12deg); } }
+@media (max-width: 850px) { .lesson-loading { padding: 24px; } }
+@media (max-width: 600px) { .lesson-loading { flex: 1 1 100%; padding: 20px; } .lesson-loading-card { padding: 28px 20px; } .lesson-loading-card h1 { font-size: 24px; } }
+@media (prefers-reduced-motion: reduce) { .walking-rugo, .walking-rugo .mascot-foot-left, .walking-rugo .mascot-foot-right { animation: none; } .lesson-loading-fill { transition: none; } }
+
