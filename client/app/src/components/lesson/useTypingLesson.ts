@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ComboMilestone } from './ComboFeedback'
 import { useSound } from '../../sound/SoundProvider'
+import { calculateWpm } from './scoring'
 
 export type SpeedSample = { seconds: number; wpm: number }
 export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; samples: SpeedSample[] }
@@ -53,7 +54,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
       const seconds = currentTime() / 1000
       const correct = [...next].reduce((count, char, i) => count + Number(char === text[i]), 0)
       if (seconds >= 1 && (samples.current.length === 0 || seconds - samples.current[samples.current.length - 1].seconds >= 1)) {
-        samples.current.push({ seconds, wpm: Math.round((correct / 5) / (seconds / 60)) })
+        samples.current.push({ seconds, wpm: calculateWpm(correct, seconds * 1000) })
       }
     }
     if (next.length < input.length) setMilestone(null)
@@ -67,7 +68,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
   }
   const correctChars = [...input].reduce((n, char, i) => n + Number(char === text[i]), 0)
   const accuracy = attempts.total ? Math.round(attempts.correct / attempts.total * 100) : 100
-  const wpm = elapsedMs > 0 ? Math.round((correctChars / 5) / (Math.max(elapsedMs, 1000) / 60000)) : 0
+  const wpm = calculateWpm(correctChars, elapsedMs)
   function finish() {
     if (!done || result) return
     const seconds = Math.max(1, elapsedMs / 1000)
