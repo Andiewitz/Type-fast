@@ -8,8 +8,8 @@ import type { MistakeCounts } from './mistakes'
 import { lessonOutcome, type LessonOutcome } from './outcome'
 
 export type SpeedSample = { seconds: number; wpm: number }
-export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; reason: Exclude<LessonOutcome, 'in-progress' | 'passed'> | null; mistakeCount: number; samples: SpeedSample[]; mistakes: MistakeCounts }
-export function useTypingLesson(text: string, minWpm: number, maxMistakes: number, caseSensitive: boolean, onComplete: (seconds: number, wpm: number, accuracy: number) => void) {
+export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; reason: Exclude<LessonOutcome, 'in-progress' | 'passed'> | null; mistakeCount: number; correctChars: number; attempts: number; correctAttempts: number; samples: SpeedSample[]; mistakes: MistakeCounts }
+export function useTypingLesson(text: string, minWpm: number, maxMistakes: number, caseSensitive: boolean, isFinalRound: boolean, onComplete: (result: LessonResultData) => void) {
   const { play } = useSound()
   const [input, setInput] = useState('')
   const [paused, setPaused] = useState(false)
@@ -81,7 +81,7 @@ export function useTypingLesson(text: string, minWpm: number, maxMistakes: numbe
     else { bankedMs.current = currentTime(); runningSince.current = null; setElapsedMs(bankedMs.current); setPaused(true) }
   }
   const correctChars = [...input].reduce((n, char, i) => n + Number(char === text[i]), 0)
-  const accuracy = attempts.total ? Math.round(attempts.correct / attempts.total * 100) : 100
+  const accuracy = attempts.total ? Math.floor(attempts.correct / attempts.total * 100) : 100
   const wpm = calculateWpm(correctChars, elapsedMs)
   useEffect(() => {
     const outcome = lessonOutcome(done, mistakeCount, maxMistakes, wpm, minWpm)
@@ -93,10 +93,11 @@ export function useTypingLesson(text: string, minWpm: number, maxMistakes: numbe
     const history = [...samples.current]
     if (history.length === 0 || seconds - history[history.length - 1].seconds > 0.1) history.push({ seconds, wpm })
     else history[history.length - 1] = { seconds, wpm }
-    play(passed ? 'success' : 'mistake')
-    setResult({ seconds, wpm, accuracy, passed, reason, mistakeCount, samples: history, mistakes: { ...mistakes.current } })
-    if (passed) onComplete(seconds, wpm, accuracy)
-  }, [done, paused, result, elapsedMs, wpm, accuracy, minWpm, maxMistakes, mistakeCount, play, onComplete])
+    play(passed ? (isFinalRound ? 'success' : 'select') : 'mistake')
+    const roundResult = { seconds, wpm, accuracy, passed, reason, mistakeCount, correctChars, attempts: attempts.total, correctAttempts: attempts.correct, samples: history, mistakes: { ...mistakes.current } }
+    setResult(roundResult)
+    if (passed) onComplete(roundResult)
+  }, [done, paused, result, elapsedMs, wpm, accuracy, minWpm, maxMistakes, mistakeCount, correctChars, attempts, isFinalRound, play, onComplete])
   return { input, change, paused, togglePause, elapsedMs, wpm, accuracy, hasTyped: attempts.total > 0, combo: attempts.combo, milestone, dismissMilestone, mistakeCount, done, result }
 }
 
