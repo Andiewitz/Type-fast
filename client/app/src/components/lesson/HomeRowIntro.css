@@ -37,3 +37,6 @@
   .home-row-steps { gap: 8px; margin-top: 18px; }
   .home-row-coach .mascot:not(.mascot-small) { width: 270px; }
 }
+.chapter-intro-sample { padding: clamp(22px, 3vw, 38px); border: 2px solid #e3dffb; border-bottom-width: 5px; border-radius: 24px; background: white; }
+.chapter-intro-sample > span { color: #6b668e; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.chapter-intro-sample pre { margin: 16px 0 0; color: #4a2fd1; font: 700 clamp(20px, 2.4vw, 32px)/1.5 'JetBrains Mono',Consolas,monospace; white-space: pre-wrap; overflow-wrap: anywhere; }

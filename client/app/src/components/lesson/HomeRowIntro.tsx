@@ -10,11 +10,11 @@ const steps = [
 
 export function HomeRowIntro({ onStart, onClose }: { onStart: () => void; onClose: () => void }) {
   return <main className="home-row-intro">
-    <header className="home-row-topbar"><button type="button" className="home-row-close" aria-label="Close introduction" onClick={onClose}>×</button><span>Unit 1 · Level 1 of 6</span></header>
+    <header className="home-row-topbar"><button type="button" className="home-row-close" aria-label="Close introduction" onClick={onClose}>×</button><span>Chapter 1 · Level 1 of 3</span></header>
     <div className="home-row-content">
       <aside className="home-row-coach"><p>Psst, feel the little bumps on F and J? That’s your home base.</p><Mascot mood="happy" /></aside>
       <section className="home-row-lesson" aria-labelledby="home-row-title">
-        <p className="home-row-level">Level 1 · F and J</p>
+        <p className="home-row-level">Chapter 1 · Left hand letters</p>
         <h1 id="home-row-title">Meet your home row</h1>
         <HomeRowKeyboard />
         <ol className="home-row-steps">{steps.map((step, index) => <li key={index}><span aria-hidden="true">{index + 1}</span><p>{step}</p></li>)}</ol>
