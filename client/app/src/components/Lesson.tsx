@@ -7,8 +7,8 @@ import { TypingKeyboard } from './lesson/TypingKeyboard'
 import { useTypingLesson } from './lesson/useTypingLesson'
 import './lesson/Lesson.css'
 function LessonAttempt({index, bestWpm, isFirstClear, onClose, onFinish, onNext, onRetry}: {index:number; bestWpm:number; isFirstClear:boolean; onClose:()=>void; onFinish:(index:number, seconds:number,wpm:number,accuracy:number)=>void; onNext?:()=>void; onRetry:()=>void}) {
- const bestBefore = useRef(bestWpm).current
- const xpReward = useRef(isFirstClear ? 20 : 0).current
+ const [bestBefore] = useState(bestWpm)
+ const [xpReward] = useState(isFirstClear ? 20 : 0)
  const lesson = lessons[index]
  const state = useTypingLesson(lesson.text, index === 5 ? 30 : 0, (seconds, wpm, accuracy) => onFinish(index, seconds, wpm, accuracy))
  const hasError = [...state.input].some((char, i) => char !== lesson.text[i])
