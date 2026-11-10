@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { lessons } from '../progress'
 import { LessonResult } from './lesson/LessonResult'
 import { LessonHeader } from './lesson/LessonHeader'
+import { HomeRowIntro } from './lesson/HomeRowIntro'
 import { TypingKeyboard } from './lesson/TypingKeyboard'
 import { useTypingLesson } from './lesson/useTypingLesson'
 import './lesson/Lesson.css'
@@ -19,8 +20,10 @@ function LessonAttempt({index, bestWpm, onClose, onFinish, onRetry}: {index:numb
 }
 
 
-export function Lesson(props: {index:number; bestWpm:number; onClose:()=>void; onFinish:(index:number, seconds:number,wpm:number)=>void}) {
+export function Lesson(props: {index:number; bestWpm:number; showIntro?:boolean; onClose:()=>void; onFinish:(index:number, seconds:number,wpm:number)=>void}) {
  const [attempt, setAttempt] = useState(0)
+ const [showIntro, setShowIntro] = useState(Boolean(props.showIntro))
+ if (showIntro) return <HomeRowIntro onStart={() => setShowIntro(false)} onClose={props.onClose}/>
  return <LessonAttempt key={attempt} {...props} onRetry={() => { setAttempt(value => value + 1); window.scrollTo(0, 0) }}/>
 }
 
