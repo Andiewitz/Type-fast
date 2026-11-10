@@ -53,3 +53,5 @@ button{cursor:pointer}.nav-item{width:100%;text-align:left;background:transparen
 @media (min-width: 1101px) and (min-height: 641px) and (max-height: 700px) {
   .mascot-wrap { left: 57px; }
 }
+
+.path-stars { color: #d89400; letter-spacing: 2px; font-size: 1rem; }
