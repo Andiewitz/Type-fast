@@ -1,19 +1,35 @@
 import { useState } from 'react'
-import { Icon } from './Icon'
+import { chapters, lessons } from '../curriculum'
 import { Mascot } from './Mascot'
 import { greetingExpressions } from './mascot/expressions'
 import { useSound } from '../sound/SoundProvider'
-import { lessons } from '../progress'
-export function LearningPath({completed, stars, start}: {completed:number; stars:number[]; start:(index:number)=>void}) {
- const { play } = useSound()
- const [expressionIndex, setExpressionIndex] = useState(0)
- const expression = greetingExpressions[expressionIndex]
- const current = Math.min(completed, lessons.length - 1)
- const offsets = ['one','two','three','four','five','six']
- return <main id="learn" className="learning"><div className="path"><header className="unit"><div><span>UNIT 1</span><h1>Home row heroes</h1></div><strong>{completed >= lessons.length ? 'Unit complete!' : `Level ${current + 1} of 6`}</strong></header>{lessons.map((lesson,i) => {
- const done = i < completed, available = i <= current
- const node = <><button type="button" className={`level-circle ${done ? 'complete' : available ? 'current' : 'locked'}`} disabled={!available} onClick={() => start(i)} aria-label={`${done ? 'Replay' : 'Start'} ${lesson.name}`}><Icon name={done ? 'check' : available ? 'keyboard' : i === 5 ? 'star' : 'lock'} size={available && !done ? 40 : 30}/></button><span>{i === 5 ? 'Speed check · 30 WPM' : `Level ${i+1} · ${lesson.name}`}</span>{stars[i] > 0 && <span className="path-stars" aria-label={`Best: ${stars[i]} out of 3 stars`}>{"★".repeat(stars[i])}{"☆".repeat(3-stars[i])}</span>}</>
- return i === current ? <div className="current-level" key={lesson.name}><div className="mascot-wrap"><button type="button" className="mascot-button" aria-label="Show next Rugo expression" onClick={() => { play('select'); setExpressionIndex((index) => (index + 1) % greetingExpressions.length) }}><Mascot mood={expression.mood}/></button><span className="mascot-message" aria-live="polite">{expression.message}</span></div><div className="current-content"><button type="button" className="start-label" onClick={() => start(i)}>{done ? 'REPLAY' : 'START'}</button>{node}</div></div> : <div className={`level ${offsets[i]}`} key={lesson.name}>{node}</div>
- })}<div className="unit next"><div><span>UNIT 2</span><h2>Top row sprint</h2></div><Icon name="lock" size={28}/></div></div></main>
-}
+import './LearningPath.css'
 
+export function LearningPath({ completed, stars, start, hasLegacy }: { completed: number; stars: number[]; start: (index: number) => void; hasLegacy: boolean }) {
+  const { play } = useSound()
+  const [expressionIndex, setExpressionIndex] = useState(0)
+  const expression = greetingExpressions[expressionIndex]
+  const current = Math.min(completed, lessons.length - 1)
+  const currentChapter = lessons[current].chapterIndex
+  return <main id="learn" className="learning"><div className="path chapter-path">
+    <header className="course-heading"><h1>Learn to type</h1><p>13 chapters, from your first keys to Java.</p></header>
+    {hasLegacy && <p className="course-migration-note">Your new course starts here. Your earlier XP, records, and previous course progress are saved on this device.</p>}
+    <div className="mascot-wrap"><button type="button" className="mascot-button" aria-label="Show next Rugo expression" onClick={() => { play('select'); setExpressionIndex(index => (index + 1) % greetingExpressions.length) }}><Mascot mood={expression.mood}/></button><span className="mascot-message" aria-live="polite">{expression.message}</span></div>
+    {chapters.map((chapter, chapterIndex) => {
+      const first = chapterIndex * 3
+      const locked = first > completed
+      const chapterComplete = completed >= first + chapter.drills.length
+      return <section className={`chapter-section ${locked ? 'is-locked' : ''}`} key={chapter.title} aria-labelledby={`chapter-${chapterIndex}`}>
+        <div className="unit chapter-heading"><div><span>Chapter {chapterIndex + 1} · Difficulty {chapter.difficulty}/10</span><h2 id={`chapter-${chapterIndex}`}>{chapter.title}</h2></div><strong>{locked ? 'Locked' : chapterComplete ? 'Complete' : `${Math.min(completed - first + 1, 3)} of 3`}</strong></div>
+        {!locked && <details className="chapter-details" open={chapterIndex === currentChapter ? true : undefined}><summary>{chapterComplete ? 'Review lessons' : 'View lessons'}</summary><div className="chapter-lessons">{chapter.drills.map((drill, levelIndex) => {
+          const index = first + levelIndex
+          const done = index < completed
+          const available = index <= completed
+          return <button type="button" className={`chapter-lesson ${index === current ? 'is-current' : ''}`} key={drill.name} disabled={!available} onClick={() => start(index)}>
+            <span className="chapter-lesson-number">{done ? '✓' : levelIndex + 1}</span><span className="chapter-lesson-name"><strong>{drill.name}</strong><small>{available ? `${lessons[index].minWpm} WPM · ${lessons[index].maxMistakes} mistakes allowed` : 'Complete the previous lesson'}</small></span>{stars[index] > 0 && <span className="path-stars" aria-label={`Best: ${stars[index]} out of 3 stars`}>{'★'.repeat(stars[index])}{'☆'.repeat(3 - stars[index])}</span>}<span aria-hidden="true">{available ? '→' : '🔒'}</span>
+          </button>
+        })}</div></details>}
+      </section>
+    })}
+  </div></main>
+}
