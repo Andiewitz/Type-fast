@@ -1,0 +1,59 @@
+/* Every group has its own joint, so actions can overlap without moving the whole picture. */
+.mascot-character .rugo-head, .mascot-character .rugo-tail, .mascot-character .rugo-body, .mascot-character .rugo-arm, .mascot-character .rugo-leg, .mascot-character .rugo-eye, .mascot-character .rugo-brows, .mascot-character .rugo-mouth { transform-box: view-box; }
+.mascot-character .rugo-head { transform-origin: 100px 135px; animation: rugo-head-idle 3.6s ease-in-out infinite; }
+.mascot-character .rugo-body { transform-origin: 100px 180px; animation: rugo-breathe 3.6s ease-in-out infinite; }
+.mascot-character .rugo-tail { transform-origin: 148px 164px; animation: rugo-tail-idle 2.1s ease-in-out infinite alternate; }
+.mascot-character .rugo-arm-left { transform-origin: 61px 141px; }
+.mascot-character .rugo-arm-right { transform-origin: 139px 141px; }
+.mascot-character .rugo-leg-left { transform-origin: 72px 174px; }
+.mascot-character .rugo-leg-right { transform-origin: 128px 174px; }
+.mascot-character .rugo-eye-left { transform-origin: 68px 78px; animation: rugo-blink 5s ease-in-out infinite; }
+.mascot-character .rugo-eye-right { transform-origin: 132px 78px; animation: rugo-blink 5s ease-in-out infinite; }
+.mascot-character .rugo-brows { transition: transform 200ms cubic-bezier(.23,1,.32,1); }
+.mascot-character.mood-happy .rugo-brows, .mascot-character.mood-celebrate .rugo-brows { transform: translateY(-4px); }
+.mascot-character.mood-encourage .rugo-brows { transform: translateY(3px) rotate(-2deg); }
+.mascot-character.mood-happy .rugo-arm-right { animation: rugo-wave 360ms ease-in-out infinite alternate; }
+.mascot-character.mood-happy .rugo-head { animation: rugo-happy-head 650ms ease-in-out infinite alternate; }
+.mascot-character.mood-celebrate .rugo-head { animation: rugo-happy-head 420ms ease-in-out infinite alternate; }
+.mascot-character.mood-celebrate .rugo-arm-left { animation: rugo-celebrate-left 420ms ease-in-out infinite alternate; }
+.mascot-character.mood-celebrate .rugo-arm-right { animation: rugo-celebrate-right 420ms ease-in-out infinite alternate; }
+.mascot-character.mood-celebrate .rugo-tail { animation-duration: 240ms; }
+@keyframes rugo-head-idle { 0%,100% { transform: rotate(-1deg); } 50% { transform: translateY(-2px) rotate(1.5deg); } }
+@keyframes rugo-breathe { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(1.04); } }
+@keyframes rugo-tail-idle { from { transform: rotate(-7deg); } to { transform: rotate(9deg); } }
+@keyframes rugo-blink { 0%,42%,46%,100% { transform: scaleY(1); } 44% { transform: scaleY(.08); } }
+@keyframes rugo-wave { from { transform: rotate(-35deg); } to { transform: rotate(-75deg); } }
+@keyframes rugo-happy-head { from { transform: rotate(-5deg); } to { transform: translateY(-4px) rotate(5deg); } }
+@keyframes rugo-celebrate-left { from { transform: rotate(30deg); } to { transform: rotate(65deg); } }
+@keyframes rugo-celebrate-right { from { transform: rotate(-30deg); } to { transform: rotate(-65deg); } }
+@media (prefers-reduced-motion: reduce) { .mascot-character .rugo-head, .mascot-character .rugo-body, .mascot-character .rugo-tail, .mascot-character .rugo-eye, .mascot-character .rugo-arm, .mascot-character .rugo-leg { animation: none !important; } .mascot-character .rugo-brows { transition: none; } }
+.lesson-result-mascot { width: 140px; height: 140px; margin: 12px auto 4px; }
+
+/* Expression templates: face and limbs remain independently controllable. */
+.mascot-character.mood-curious .rugo-head { animation: rugo-curious 1.1s cubic-bezier(.23,1,.32,1) both; }
+.mascot-character.mood-curious .rugo-brows { transform: translateY(-3px) rotate(-4deg); }
+.mascot-character.mood-curious .rugo-arm-left { transform: rotate(22deg); }
+.mascot-character.mood-thinking .rugo-head { animation: rugo-thinking 1.4s ease-in-out infinite alternate; }
+.mascot-character.mood-thinking .rugo-brows { transform: translateY(2px) rotate(3deg); }
+.mascot-character.mood-thinking .rugo-arm-left { transform: rotate(65deg) translateY(-7px); }
+.mascot-character.mood-thinking .rugo-eye-left, .mascot-character.mood-thinking .rugo-eye-right { animation: none; transform: translate(3px, -3px); }
+.mascot-character.mood-surprised .rugo-head { animation: rugo-surprised 600ms cubic-bezier(.23,1,.32,1) both; }
+.mascot-character.mood-surprised .rugo-brows { transform: translateY(-8px); }
+.mascot-character.mood-surprised .rugo-eye-left, .mascot-character.mood-surprised .rugo-eye-right { animation: none; transform: scale(1.09); }
+.mascot-character.mood-surprised .rugo-arm-left { transform: rotate(36deg); }
+.mascot-character.mood-surprised .rugo-arm-right { transform: rotate(-36deg); }
+.mascot-character.mood-proud .rugo-head { animation: rugo-proud 750ms cubic-bezier(.23,1,.32,1) both; }
+.mascot-character.mood-proud .rugo-brows { transform: translateY(-3px); }
+.mascot-character.mood-proud .rugo-arm-left { transform: rotate(28deg); }
+.mascot-character.mood-proud .rugo-arm-right { transform: rotate(-28deg); }
+.mascot-character.mood-proud .rugo-body { animation: rugo-proud-body 1.8s ease-in-out infinite alternate; }
+@keyframes rugo-curious { 0% { transform: rotate(0); } 60% { transform: rotate(-11deg) translateY(-3px); } 100% { transform: rotate(-8deg); } }
+@keyframes rugo-thinking { from { transform: rotate(5deg); } to { transform: translateY(-2px) rotate(8deg); } }
+@keyframes rugo-surprised { 0% { transform: translateY(0) scale(1); } 45% { transform: translateY(-7px) scale(1.04); } 100% { transform: translateY(0) scale(1); } }
+@keyframes rugo-proud { 0% { transform: rotate(0); } 60% { transform: translateY(-4px) rotate(4deg); } 100% { transform: rotate(3deg); } }
+@keyframes rugo-proud-body { from { transform: scaleY(1); } to { transform: scaleY(1.05); } }
+@media (prefers-reduced-motion: reduce) {
+  .mascot-character.mood-curious .rugo-head, .mascot-character.mood-thinking .rugo-head,
+  .mascot-character.mood-surprised .rugo-head, .mascot-character.mood-proud .rugo-head,
+  .mascot-character.mood-proud .rugo-body { animation: none !important; }
+}

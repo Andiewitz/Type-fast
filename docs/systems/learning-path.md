@@ -1,13 +1,9 @@
 # Learning path
 
-The React app includes six home-row exercises. Complete each exercise to unlock the next; the final speed check requires 30 WPM. Completed exercises can be replayed, and Practice starts the first exercise. The timer starts with the first typed character and WPM is calculated from five-character words and elapsed time. Only completed exercises count toward progress.
+The React app includes six home-row exercises. Complete each exercise to unlock the next; the final speed check requires 30 WPM. Completed exercises can be replayed, and Practice starts the first exercise. The timer starts with the first typed character, pauses with the lesson, and records elapsed time. WPM uses correct characters divided into five-character words; accuracy counts correct attempts out of all typed attempts, and the combo counts consecutive correct attempts. The keyboard highlights the next expected key. Learners must correct mistakes and finish the full exercise before selecting Finish lesson. Only passed exercises count toward progress. Results award one star for passing, two for at least 90% accuracy, or three for at least 98%; stars are shown for the current attempt. Speed charts use actual samples from the current attempt and display an empty state if there are too few samples. Retry starts a fresh attempt and a completed replay can earn XP again.
 
 Progress, XP, best WPM, activity dates and daily goal totals are saved in the browser's local storage under `rugo-progress`. They are specific to the browser and origin, not synced to an account. Daily goals reset at the next local calendar day. The league page is informational until an online leaderboard is implemented; Unit 2 remains unavailable.
 
-Rugo can be activated by pointer or keyboard. The mascot's motion respects the user's reduced-motion preference.
+Opening or replaying an exercise shows a brief full-screen preparation screen before the lesson. The lesson uses a focused layout; navigation and progress return when the learner goes back to the path.
 
-On the learning path, Rugo remains visible while scrolling. On smaller screens and short windows, the mascot uses a compact corner placement.
-
-Opening or replaying an exercise shows a brief full-screen timed preparation screen before the lesson. The lesson also uses a full-screen focus layout; navigation and progress return when the learner goes back to the path. Rugo's walking animation respects reduced-motion settings.
-
-
+Rugo is a reusable SVG character with independently animated head, eyes, eyebrows, mouth, body, arms, legs and tail. The learning-path mascot cycles through reusable idle, happy, curious, thinking, surprised, proud and celebration expression templates when activated. He uses a side-facing walk cycle during preparation and reacts to lesson results, with a supportive expression for a missed speed target. Motion respects reduced-motion settings. On the learning path Rugo stays visible while scrolling; smaller screens use a compact corner placement. The earlier Rive and illustrated experiments are retained as source material and are not used in the app.
