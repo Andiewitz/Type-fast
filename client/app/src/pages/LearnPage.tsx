@@ -9,10 +9,17 @@ import { PracticePage } from './PracticePage'
 import { lessons, readProgress, todayKey, type Page } from '../progress'
 import { useSound } from '../sound/SoundProvider'
 import { recordBestStars, starsFor } from '../components/lesson/stars'
+import { resetDailyTotals } from '../dailyProgress'
 export function LearnPage() {
  const { play } = useSound()
  const [page,setPage]=useState<Page>('Learn'); const [lesson,setLesson]=useState<number|null>(null); const [loadingLesson,setLoadingLesson]=useState<number|null>(null); const [progress,setProgress]=useState(readProgress)
  useEffect(()=>{localStorage.setItem('rugo-progress',JSON.stringify(progress))},[progress])
+ useEffect(() => {
+  const refresh = () => setProgress(old => resetDailyTotals(old, todayKey()))
+  const timer = window.setInterval(refresh, 60_000)
+  document.addEventListener('visibilitychange', refresh)
+  return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
+ }, [])
  function navigate(next:Page){setLoadingLesson(null);setLesson(null);setPage(next);window.scrollTo(0,0)}
  const openLesson = useCallback((index:number) => { setLoadingLesson(null); setLesson(index) }, [])
  function startLesson(index:number){play('select');setLesson(null);setLoadingLesson(index);window.scrollTo(0,0)}
