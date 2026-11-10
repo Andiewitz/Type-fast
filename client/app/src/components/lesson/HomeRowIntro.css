@@ -1,0 +1,12 @@
+.home-row-intro { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: #f3f1ff; color: #211b43; }
+.home-row-card { width: min(100%, 580px); padding: clamp(24px, 5vw, 48px); background: white; border: 2px solid #e5e0fa; border-radius: 28px; text-align: center; }
+.home-row-card h1 { font-size: clamp(28px, 5vw, 40px); margin: 8px 0 16px; }
+.home-row-card p { line-height: 1.5; color: #514b70; }
+.home-row-mascot { width: 100px; height: 100px; margin: auto; }
+.home-row-keys { display: flex; justify-content: center; gap: 6px; margin: 24px 0; }
+.home-row-keys span, .home-row-keys strong { display: grid; place-items: center; width: 42px; height: 44px; background: #f1effb; border-radius: 8px; }
+.home-row-keys strong { background: #684aff; color: white; }
+.home-row-keys strong:nth-child(5) { margin-left: 12px; }
+.home-row-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.home-row-actions button { padding: 12px 20px; border: 2px solid #ded9f7; border-radius: 12px; background: white; font: inherit; font-weight: 800; cursor: pointer; }
+.home-row-actions button:last-child { background: #684aff; color: white; border-color: #684aff; }
