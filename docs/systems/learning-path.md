@@ -15,3 +15,5 @@ Lesson and results action bars stay visible at the bottom of the viewport while 
 Sound effects use Howler.js and locally generated short cues for starting a lesson, typing, mistakes, combo milestones and results. Five, ten, twenty, thirty, fifty, seventy-five and one hundred correct keys trigger a short milestone; larger milestones have a distinct cue. Rugo reacts to long combos and offers encouragement after a mistake. The Sound control is available on the learning path, during lessons and on results; the setting persists on the device. Sounds start only after interaction and can be muted.
 
 
+
+Run `npm run test:lesson` to check the lesson scoring, correction, stars, mistake summaries and daily rollover rules.
