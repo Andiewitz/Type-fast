@@ -1,0 +1,13 @@
+.sound-toggle { display:flex; align-items:center; gap:10px; min-height:44px; padding:0 14px; color:#5e5a80; background:#fff; border:2px solid #e3dffb; border-bottom-width:4px; border-radius:14px; font:800 13px Nunito,sans-serif; }
+.sound-toggle-compact { width:44px; height:44px; padding:0; justify-content:center; flex:none; }
+.sound-toggle:focus-visible { outline:3px solid #ff9f32; outline-offset:3px; }
+@media (hover:hover) and (pointer:fine) { .sound-toggle:hover { color:#4a2fd1; background:#ede9ff; } }
+@media (max-width:850px) { .sidebar .sound-toggle { margin-left:auto; flex:none; } .sidebar .sound-toggle span { display:none; } .sidebar .sound-toggle { width:44px; padding:0; justify-content:center; } }
+@media (max-width:600px) { .sidebar .sound-toggle { position:absolute; top:16px; right:20px; } .sidebar { position:relative; } }
+.sidebar > .sound-toggle { margin-top:16px; margin-bottom:0; }
+.sidebar > .sound-toggle + .layout { margin-top:auto; }
+@media (max-width:850px) { .sidebar > .sound-toggle { margin-top:0; margin-bottom:0; } }
+@media (max-width:600px) { .lesson-topbar { gap:6px; } .lesson-topbar .sound-toggle-compact { width:38px; height:38px; min-height:38px; border-radius:12px; } }
+.result-sound { position:absolute; top:16px; right:20px; z-index:2; }
+.result-screen { position:relative; }
+

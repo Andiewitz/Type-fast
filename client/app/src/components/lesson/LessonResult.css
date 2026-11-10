@@ -11,3 +11,15 @@
 .result-actions { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px max(32px,calc((100% - 1200px)/2)); background:#fff; border-top:2px solid #e3dffb; }.result-actions button { min-height:54px; padding:0 30px; border:2px solid #e3dffb; border-bottom-width:5px; border-radius:16px; background:#fff; color:#4a2fd1; font:600 16px Fredoka,sans-serif; text-transform:uppercase; letter-spacing:.06em; }.result-actions .result-continue { min-width:190px; background:#6c4dff; border-color:#4a2fd1; color:white; }
 @media (max-width:800px) { .result-content { grid-template-columns:1fr; width:min(100% - 40px,600px); padding:26px 0 36px; gap:12px; }.result-celebration { padding:5px 0 15px; }.result-rugo .mascot:not(.mascot-small) { width:180px; height:180px; }.result-celebration p { font-size:16px; }.result-stars { margin:4px 0 12px; }.result-confetti { inset:0 15%; }.result-actions { padding:14px 20px; } }
 @media (max-width:480px) { .result-stats { gap:7px; }.result-stat > span { font-size:10px; }.result-stat > div { min-height:80px; padding:13px 3px 8px; }.result-stat strong { font-size:26px; }.result-stat small { font-size:11px; }.result-chart-card { padding:16px; }.result-chart-heading h2 { font-size:17px; }.result-actions button { padding:0 14px; font-size:13px; }.result-actions .result-continue { min-width:130px; }.result-tip { font-size:14px; } }
+
+.result-actions { position: sticky; bottom: 0; z-index: 10; padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .result-star-earned { animation: result-star-pop 420ms cubic-bezier(.23,1,.32,1) both; transform-origin:center; transform-box:fill-box; }
+  .result-star-earned:nth-child(2) { animation-delay:100ms; }
+  .result-star-earned:nth-child(3) { animation-delay:200ms; }
+  .result-confetti i { animation: result-confetti-enter 550ms cubic-bezier(.23,1,.32,1) both; }
+  .result-confetti i:nth-child(even) { animation-delay:100ms; }
+}
+@keyframes result-star-pop { from { opacity:0; transform:translateY(10px) scale(.9); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes result-confetti-enter { from { opacity:0; transform:translateY(-12px) rotate(0); } to { opacity:1; transform:translateY(0) rotate(22deg); } }

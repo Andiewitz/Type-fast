@@ -6,4 +6,12 @@ Progress, XP, best WPM, activity dates and daily goal totals are saved in the br
 
 Opening or replaying an exercise shows a brief full-screen preparation screen before the lesson. The lesson uses a focused layout; navigation and progress return when the learner goes back to the path.
 
-Rugo is a reusable SVG character with independently animated head, eyes, eyebrows, mouth, body, arms, legs and tail. The learning-path mascot cycles through reusable idle, happy, curious, thinking, surprised, proud and celebration expression templates when activated. He uses a side-facing walk cycle during preparation and reacts to lesson results, with a supportive expression for a missed speed target. Motion respects reduced-motion settings. On the learning path Rugo stays visible while scrolling; smaller screens use a compact corner placement. The earlier Rive and illustrated experiments are retained as source material and are not used in the app.
+Rugo is a reusable SVG character with independently animated head, eyes, eyebrows, mouth, body, arms, legs and tail. The learning-path mascot cycles through reusable idle, happy, curious, thinking, surprised, proud and celebration expression templates when activated. He uses a side-facing walk cycle during preparation and reacts to lesson results, with distinct eyes, brows and mouth shapes for celebration, surprise, thought and encouragement. Motion respects reduced-motion settings. On the learning path Rugo stays visible while scrolling; smaller screens use a compact corner placement. The earlier Rive and illustrated experiments are retained as source material and are not used in the app.
+
+On compact screens, the learning path, progress panels, keyboard guide and lesson results adapt to the available width. The fixed mascot uses a smaller footprint on phones.
+
+Lesson and results action bars stay visible at the bottom of the viewport while content scrolls.
+
+Sound effects use Howler.js and locally generated short cues for starting a lesson, typing, mistakes, combo milestones and results. Five, ten, twenty, thirty, fifty, seventy-five and one hundred correct keys trigger a short milestone; larger milestones have a distinct cue. Rugo reacts to long combos and offers encouragement after a mistake. The Sound control is available on the learning path, during lessons and on results; the setting persists on the device. Sounds start only after interaction and can be muted.
+
+

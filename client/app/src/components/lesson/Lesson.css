@@ -42,3 +42,25 @@
 @media (max-width: 900px) { .lesson-dashboard { align-items: flex-start; flex-direction: column; gap: 16px; }.lesson-stats { width: 100%; }.lesson-stat { flex: 1; width: auto; }.lesson-coach .mascot { width: 100px; height: 100px; }.lesson-exercise { min-height: 280px; } }
 @media (max-width: 600px) { .lesson-content { width: calc(100% - 32px); padding-top: 16px; }.lesson-topbar { gap: 10px; }.lesson-close { width: 34px; }.lesson-combo { min-width: 92px; padding: 8px; font-size: 12px; }.lesson-progress { height: 14px; }.lesson-dashboard { margin: 14px 0; }.lesson-coach .mascot { width: 76px; height: 76px; }.lesson-coach p { padding: 10px 12px; font-size: 13px; }.lesson-stat { min-height: 78px; padding: 9px; }.lesson-stat strong { font-size: 24px; }.lesson-stat > span { font-size: 10px; }.lesson-exercise { min-height: 220px; padding: 20px; }.lesson-exercise-heading { font-size: 11px; }.lesson-text { margin-top: 46px; font-size: 23px; }.typing-keyboard { margin-top: 18px; }.keyboard-row { gap: 3px; }.keyboard-row-1, .keyboard-row-2, .keyboard-row-3 { padding-left: 0; }.keyboard-key { width: min(7vw, 34px); height: 34px; border-radius: 8px; }.lesson-actions { padding: 12px 16px; }.lesson-finish-button { min-width: 150px; }.lesson-result-shell { padding: 24px 16px; } }
 @media (prefers-reduced-motion: reduce) { .lesson-progress span { transition: none; } }
+
+@media (max-width: 360px) {
+  .lesson-coach { gap: 10px; }
+  .lesson-coach p { padding: 9px 10px; }
+  .lesson-exercise { padding-inline: 16px; }
+  .lesson-exercise-heading h1 { max-width: 60%; overflow-wrap: anywhere; }
+  .lesson-actions { gap: 8px; }
+  .lesson-pause-button, .lesson-finish-button { padding-inline: 14px; }
+  .lesson-finish-button { min-width: 0; }
+}
+
+/* Keep the lesson actions reachable while the exercise scrolls. */
+.lesson-actions { position: sticky; bottom: 0; z-index: 10; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+
+/* Celebrate in Rugo's speech bubble without covering the exercise. */
+.combo-feedback { color:#4a2fd1; }
+.combo-feedback > span:first-child { color:#d98b00; }
+.lesson-combo { transition:background-color 160ms ease, border-color 160ms ease; }
+.lesson-combo.combo-warm { background:#fff2c8; border-color:#ffc93c; }
+.lesson-combo.combo-hot { background:#ffe4cf; border-color:#ff9c4a; }
+@media (prefers-reduced-motion:reduce) { .lesson-combo { transition:none; } }
+
