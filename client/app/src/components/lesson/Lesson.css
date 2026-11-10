@@ -64,3 +64,5 @@
 .lesson-combo.combo-hot { background:#ffe4cf; border-color:#ff9c4a; }
 @media (prefers-reduced-motion:reduce) { .lesson-combo { transition:none; } }
 
+
+.lesson-input-notice { position: absolute; bottom: 1rem; left: 1.5rem; right: 1.5rem; color: #a33430; font-weight: 700; }
