@@ -30,7 +30,6 @@ export function LessonLoading({ index, onReady }: { index: number; onReady: (ind
         <div className="lesson-loading-fill" style={{ transform: `scaleX(${progress / 100})` }} />
       </div>
       <span className="lesson-loading-caption">Getting your next lesson ready</span>
-      <button type="button" className="lesson-loading-skip" onClick={() => onReady(index)}>Start now</button>
     </section>
   </main>
 }
