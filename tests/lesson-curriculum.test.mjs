@@ -1,20 +1,24 @@
 import { strict as assert } from 'node:assert'
 import { test } from 'node:test'
-import { lessons } from '../client/app/src/curriculum.ts'
+import { chapters, lessons } from '../client/app/src/curriculum.ts'
 
-test('the path increases speed targets and tightens mistake allowances', () => {
-  assert.equal(lessons[0].maxMistakes, 5)
-  assert.equal(lessons.at(-1).minWpm, 30)
-  lessons.slice(1).forEach((lesson, index) => {
-    assert.ok(lesson.minWpm >= lessons[index].minWpm)
-    assert.ok(lesson.maxMistakes <= lessons[index].maxMistakes)
-  })
+test('all thirteen chapters contain three playable exercises', () => {
+  assert.equal(chapters.length, 13)
+  assert.equal(lessons.length, 39)
+  assert.ok(chapters.every(chapter => chapter.drills.length === 3))
+  assert.ok(lessons.every(lesson => lesson.text.length > 0 && lesson.minWpm > 0 && lesson.maxMistakes >= 0))
 })
-test('each exercise uses only keys introduced so far', () => {
-  const introduced = ['fj', 'dk', 'sl', 'a;', 'gh', '']
-  let keys = ' '
-  lessons.forEach((lesson, index) => {
-    keys += introduced[index]
-    for (const char of lesson.text) assert.ok(keys.includes(char), `${lesson.name} uses ${char} before it is introduced`)
-  })
+test('capitalization begins at chapter four', () => {
+  assert.ok(chapters.slice(0, 3).every(chapter => !chapter.caseSensitive))
+  assert.ok(chapters.slice(3).every(chapter => chapter.caseSensitive))
+})
+test('chapter content includes whitespace, symbols and Java', () => {
+  assert.ok(chapters[7].drills.some(drill => drill.text.includes('\n') && drill.text.includes('\t')))
+  assert.match(chapters[8].drills.map(drill => drill.text).join(' '), /[@#$%]/)
+  assert.match(chapters[11].drills.map(drill => drill.text).join(' '), /class/)
+})
+
+test('hand-specific chapters use only their designated letters', () => {
+  assert.match(chapters[0].drills.map(drill => drill.text).join(' '), /^[qwertasdfgzxcvb ]+$/)
+  assert.match(chapters[1].drills.map(drill => drill.text).join(' '), /^[yuiophjklnm ]+$/)
 })
