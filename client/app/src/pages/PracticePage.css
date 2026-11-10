@@ -1,0 +1,5 @@
+.practice-list { display: grid; gap: 10px; margin-top: 24px; }
+.practice-list button { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border: 2px solid #e3dffb; border-radius: 14px; background: white; color: #211b43; text-align: left; font: inherit; }
+.practice-list button:hover { background: #f5f3ff; }
+.practice-list button span:first-child { display: grid; gap: 3px; }
+.practice-list small { color: #615b80; }
