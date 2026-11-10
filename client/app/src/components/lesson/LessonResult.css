@@ -23,3 +23,6 @@
 }
 @keyframes result-star-pop { from { opacity:0; transform:translateY(10px) scale(.9); } to { opacity:1; transform:translateY(0) scale(1); } }
 @keyframes result-confetti-enter { from { opacity:0; transform:translateY(-12px) rotate(0); } to { opacity:1; transform:translateY(0) rotate(22deg); } }
+.result-exit { position: absolute; z-index: 3; top: 16px; left: 20px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 12px; background: transparent; color: #5e5a80; }
+.result-exit:hover { background: #e9e5fb; }
+@media (max-width: 800px) { .result-content { padding-top: 66px; } }
