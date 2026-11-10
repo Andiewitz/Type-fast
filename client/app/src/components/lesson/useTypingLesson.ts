@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ComboMilestone } from './ComboFeedback'
 import { useSound } from '../../sound/SoundProvider'
 import { calculateWpm } from './scoring'
+import { canApplyEdit } from './edits'
 
 export type SpeedSample = { seconds: number; wpm: number }
 export type LessonResultData = { seconds: number; wpm: number; accuracy: number; passed: boolean; samples: SpeedSample[] }
@@ -29,7 +30,7 @@ export function useTypingLesson(text: string, minWpm: number, onComplete: (secon
   }, [started, paused, done, result])
 
   function change(value: string) {
-    if (paused || done || result) return
+    if (paused || done || result || !canApplyEdit(input, value, text)) return
     if (!started && value.length > 0) { runningSince.current = Date.now(); setStarted(true) }
     const next = value.slice(0, text.length)
     let prefix = 0
