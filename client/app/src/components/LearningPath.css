@@ -1,23 +1,7 @@
-.chapter-path { max-width: 720px; }
-.course-heading { margin-bottom: 24px; }
-.course-heading h1 { font: 600 36px Fredoka,sans-serif; }
-.course-heading p, .course-migration-note { margin-top: 8px; color: #5e5a80; line-height: 1.5; }
-.course-migration-note { padding: 14px 16px; margin-bottom: 18px; border-radius: 14px; background: #fff2c8; font-size: 14px; font-weight: 700; }
-.chapter-section { margin-bottom: 18px; }
-.chapter-heading { margin-bottom: 0; }
-.chapter-heading h2 { margin: 4px 0 0; }
-.chapter-heading > strong { white-space: nowrap; }
-.chapter-section.is-locked { opacity: .72; }
-.chapter-details { margin: 8px 0 0; border: 2px solid #e3dffb; border-radius: 16px; background: white; overflow: hidden; }
-.chapter-details summary { padding: 12px 16px; color: #4a2fd1; cursor: pointer; font-weight: 800; }
-.chapter-lessons { display: grid; gap: 8px; padding: 0 12px 12px; }
-.chapter-lesson { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px; border: 2px solid #e3dffb; border-radius: 12px; background: white; color: #1f1a3d; text-align: left; font: inherit; }
-.chapter-lesson.is-current { border-color: #6c4dff; background: #f4f2ff; }
-.chapter-lesson:disabled { opacity: .65; cursor: not-allowed; }
-.chapter-lesson-number { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #ede9ff; color: #4a2fd1; font-weight: 800; }
-.chapter-lesson-name { flex: 1; min-width: 0; display: grid; gap: 2px; }
-.chapter-lesson-name small { color: #5e5a80; font-size: 12px; }
-@media (max-width: 520px) { .course-heading h1 { font-size: 29px; } .chapter-heading { gap: 8px; } .chapter-heading h2 { font-size: 20px; } .chapter-heading > strong { font-size: 12px; } .chapter-lesson { gap: 8px; } }
+.chapter-section { width: 100%; }
+.chapter-section .unit.next { margin-top: 0; }
+.chapter-levels { display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 28px 0 12px; }
+.course-migration-note { width: 100%; padding: 14px 16px; border-radius: 14px; background: #fff2c8; color: #5e5a80; font-size: 14px; font-weight: 700; line-height: 1.5; }
 @media (max-width: 600px) {
   .chapter-path .mascot-wrap { width: 60px; right: 8px; bottom: 8px; }
   .chapter-path .mascot-wrap .mascot:not(.mascot-small) { width: 60px; height: 60px; }
