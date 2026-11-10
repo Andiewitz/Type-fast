@@ -1,5 +1,5 @@
 .lesson-loading { min-height: 100vh; min-height: 100dvh; padding: 28px 32px; display: flex; justify-content: center; align-items: center; background: #f4f2ff; }
-.lesson-loading-card { width: 100%; max-width: 640px; padding: 36px 28px 40px; text-align: center; background: #fff; border: 2px solid #e3dffb; border-bottom-width: 5px; border-radius: 20px; }
+.lesson-loading-card { width: 100%; max-width: 640px; padding: 36px 28px 40px; text-align: center; }
 .lesson-loading-art { width: 190px; margin: 0 auto 24px; }
 .walking-rugo .mascot { display: block; margin: 0 auto; }
 .walking-ground { width: 150px; height: 6px; margin: -5px auto 0; border-radius: 999px; background: #e3dffb; }
